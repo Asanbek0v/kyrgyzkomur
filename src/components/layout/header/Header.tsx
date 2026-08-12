@@ -5,7 +5,7 @@ const Header: FC = () => {
   return (
     <section id="Header">
       <div className="container">
-        <div className="Header">Header</div>
+        <div className="Header"></div>
       </div>
     </section>
   );
