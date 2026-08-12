@@ -1,7 +1,6 @@
 import React from "react";
 import "./Hero.scss";
 
-
 const cardsData = [
   {
     id: 1,
@@ -44,12 +43,10 @@ const cardsData = [
 const Hero = () => {
   return (
     <section className="hero-carousel-container">
-   
       <div className="hero-bg-image"></div>
-      <div className="hero-bg-overlay"></div> 
+      <div className="hero-bg-overlay"></div>
 
       <div className="hero-wrapper">
-       
         <div className="hero-text">
           <span className="badge">Кыргыз Көмүр</span>
           <h1>
@@ -63,7 +60,6 @@ const Hero = () => {
           <button className="gold-btn">Буйрутма берүү ➔</button>
         </div>
 
-     
         <div className="carousel-3d-scene">
           <div className="carousel-3d-spinner">
             {cardsData.map((card, index) => (
