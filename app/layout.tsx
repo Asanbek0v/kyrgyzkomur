@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.scss";
 import AOSInit from "@/src/components/AOSInit";
+import ChatWidget from "@/src/components/pages/chat/ChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
       >
         <AOSInit />
         {children}
+        <ChatWidget />
       </body>
     </html>
   );
