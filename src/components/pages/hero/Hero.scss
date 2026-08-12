@@ -11,10 +11,7 @@ $dark-bg: #0d0d0f;
   padding: 60px 20px;
   color: #ffffff;
   overflow: hidden;
-
-  /* ==========================================
-     🏔️ АРТКЫ ФОНДОГУ СҮРӨТ СТИЛИ
-     ========================================== */
+   
  .hero-bg-image {
     position: absolute;
     top: 0;
@@ -25,12 +22,11 @@ $dark-bg: #0d0d0f;
     background-image: url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1600');
     background-size: cover;
     background-position: center;
-    filter: blur(3px) brightness(0.35); /* Сүрөт текстке тоскоол болбошу үчүн күңүрттөө */
+    filter: blur(3px) brightness(0.35);
     transform: scale(1.05);
     z-index: 1;
   }
 
-  /* Текст жана карусель тунук көрүнүшү үчүн үстүндөгү кочкул каптоо */
   .hero-bg-overlay {
     position: absolute;
     top: 0;
@@ -57,7 +53,7 @@ $dark-bg: #0d0d0f;
     }
   }
 
-  /* Текст жагы */
+
   .hero-text {
     flex: 1;
 
@@ -107,7 +103,7 @@ $dark-bg: #0d0d0f;
     }
   }
 
-  /* 3D Карусель */
+
   .carousel-3d-scene {
     width: 380px;
     height: 300px;

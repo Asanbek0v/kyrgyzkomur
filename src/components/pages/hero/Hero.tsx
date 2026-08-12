@@ -1,7 +1,7 @@
 import React from "react";
 import "./Hero.scss";
 
-// 6 түрдүү сүрөт жана маалыматтар топтому
+
 const cardsData = [
   {
     id: 1,
@@ -63,7 +63,7 @@ const Hero = () => {
           <button className="gold-btn">Буйрутма берүү ➔</button>
         </div>
 
-        {/* Оң тараптагы 3D АЙЛАНУУЧУ 6 СҮРӨТ КАРУСЕЛИ */}
+     
         <div className="carousel-3d-scene">
           <div className="carousel-3d-spinner">
             {cardsData.map((card, index) => (
