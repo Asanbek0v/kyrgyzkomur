@@ -41,7 +41,7 @@ const Management: FC = () => {
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: true, // Анимация бир жолу гана иштейт
+      once: true,
     });
   }, []);
 
@@ -49,12 +49,8 @@ const Management: FC = () => {
     <section id="Management">
       <div className="container">
         <div className="Management">
-          {/* Сол жактагы жетекчилер блогу */}
           <div className="Management__content">
-            <div 
-              className="Management__header"
-              data-aos="fade-right"
-            >
+            <div className="Management__header" data-aos="fade-right">
               <h2>Руководство ОАО «Кыргызкөмүр»</h2>
               <div className="Management__line"></div>
             </div>
@@ -65,7 +61,7 @@ const Management: FC = () => {
                   key={item.id}
                   className="Management__card"
                   data-aos="fade-up"
-                  data-aos-delay={100 + index * 100} // Ирети менен (stagger) чыгат
+                  data-aos-delay={100 + index * 100}
                 >
                   <div className="Management__icon">
                     <User size={28} />
