@@ -43,14 +43,10 @@ const About: FC = () => {
     <section id="About">
       <div className="container">
         <div className="About">
-          {/* Негизги маалымат блогу */}
           <div className="About__content">
             <div className="About__header" data-aos="fade-right">
               <h2>Товарищество угледобывающих предприятий</h2>
-              <div className="About__line"></div>
             </div>
-
-            {/* Киришүү текст */}
             <div className="About__intro" data-aos="fade-up">
               <p>
                 В 2012 году угледобывающие предприятия Кыргызской Республики
@@ -141,7 +137,6 @@ const About: FC = () => {
               </ul>
             </div>
 
-            {/* Координациялык кеңеш */}
             <div className="About__section" data-aos="fade-up">
               <h3>Координационный совет</h3>
               <p>

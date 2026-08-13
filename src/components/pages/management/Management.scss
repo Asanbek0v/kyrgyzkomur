@@ -1,16 +1,19 @@
 :root {
-  --gold: #d4af37;
-  --gold-light: #ffe38d;
-  --dark-bg: #0f1115;
-  --dark-bg-2: #16191f;
-  --border-subtle: rgba(212, 175, 55, 0.15);
-  --text-light: rgba(245, 245, 245, 0.92);
-  --text-muted: rgba(245, 245, 245, 0.6);
+  --bg-main: #f8fafc;
+  --card-bg: #ffffff;
+  --card-hover-border: #0284c7;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+
+  --blue-primary: #0284c7;
+  --blue-light-bg: #f0f9ff;
+  --border-subtle: #e2e8f0;
 }
 
 #Management {
-  background-color: var(--dark-bg);
-  color: var(--text-light);
+  background-color: var(--bg-main);
+  color: var(--text-main);
   padding: 80px 0;
   min-height: 80vh;
 
@@ -29,7 +32,7 @@
       h2 {
         font-size: 28px;
         font-weight: 700;
-        color: var(--text-light);
+        color: var(--text-main);
         margin-bottom: 12px;
         letter-spacing: 0.02em;
       }
@@ -40,8 +43,8 @@
       height: 2px;
       background: linear-gradient(
         90deg,
-        var(--gold) 0%,
-        rgba(212, 175, 55, 0.2) 60%,
+        var(--blue-primary) 0%,
+        rgba(2, 132, 199, 0.2) 60%,
         transparent 100%
       );
     }
@@ -52,20 +55,22 @@
       gap: 20px;
     }
 
+    /* Ак карточкалар */
     &__card {
       display: flex;
       align-items: center;
       gap: 20px;
-      background: var(--dark-bg-2);
+      background: var(--card-bg);
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
       padding: 24px;
-      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: all 0.25s ease;
 
       &:hover {
-        border-color: var(--gold);
+        border-color: var(--card-hover-border);
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(212, 175, 55, 0.08);
+        box-shadow: 0 10px 25px rgba(2, 132, 199, 0.08);
       }
     }
 
@@ -73,9 +78,9 @@
       width: 56px;
       height: 56px;
       border-radius: 12px;
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px solid var(--border-subtle);
-      color: var(--gold);
+      background: var(--blue-light-bg);
+      border: 1px solid rgba(2, 132, 199, 0.15);
+      color: var(--blue-primary);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -86,7 +91,7 @@
       h3 {
         font-size: 20px;
         font-weight: 600;
-        color: var(--text-light);
+        color: var(--text-main);
         margin-bottom: 6px;
       }
 
@@ -95,7 +100,7 @@
         align-items: center;
         gap: 6px;
         font-size: 14px;
-        color: var(--gold-light);
+        color: var(--blue-primary);
         font-weight: 500;
       }
     }
@@ -109,15 +114,16 @@
     }
 
     &__sidebar-box {
-      background: var(--dark-bg-2);
+      background: var(--card-bg);
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
       padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
       h3 {
         font-size: 18px;
         font-weight: 600;
-        color: var(--text-light);
+        color: var(--text-main);
         padding-bottom: 12px;
         border-bottom: 1px solid var(--border-subtle);
         margin-bottom: 16px;
@@ -129,7 +135,7 @@
         margin: 0;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
 
         li {
           a {
@@ -145,9 +151,8 @@
             transition: all 0.2s ease;
 
             &:hover {
-              color: var(--text-light);
-              background: rgba(212, 175, 55, 0.1);
-              color: var(--gold);
+              background: var(--blue-light-bg);
+              color: var(--blue-primary);
             }
           }
         }
