@@ -185,14 +185,14 @@
         line-height: 1.5;
         color: var(--text-muted);
 
-        &::before {
-          content: "•";
-          position: absolute;
-          left: 6px;
-          color: var(--blue-primary);
-          font-size: 20px;
-          line-height: 1;
-        }
+        // &::before {
+        //   content: "•";
+        //   position: absolute;
+        //   left: 6px;
+        //   color: var(--blue-primary);
+        //   font-size: 20px;
+        //   line-height: 1;
+        // }
       }
     }
 

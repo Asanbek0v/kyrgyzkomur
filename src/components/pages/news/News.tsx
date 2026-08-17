@@ -5,7 +5,7 @@ const News: FC = () => {
   return (
     <section id="News">
       <div className="container">
-        <div className="News">news</div>
+        <div className="News">News</div>
       </div>
     </section>
   );

@@ -1,5 +1,4 @@
 :root {
-  --bg-dark: #002d6a;
   --bg-dark-2: #002454;
   --blue-active: #2bbfff;
   --blue-light: #64d4ff;
@@ -14,21 +13,21 @@
   padding: 64px 0 32px;
   position: relative;
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--blue-active) 50%,
-      transparent
-    );
-    opacity: 0.5;
-  }
+  // &::before {
+  //   content: "";
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   right: 0;
+  //   height: 1px;
+  //   background: linear-gradient(
+  //     90deg,
+  //     transparent,
+  //     var(--blue-active) 50%,
+  //     transparent
+  //   );
+  //   opacity: 0.5;
+  // }
 
   .Footer {
     display: flex;
@@ -40,7 +39,7 @@
     border-bottom: 1px solid var(--border-subtle);
 
     &--left {
-      flex: 1 1 300px;
+      // flex: 1 1 300px;
       max-width: 380px;
 
       .Footer__logo {
@@ -79,7 +78,7 @@
         letter-spacing: 0.05em;
         margin-bottom: 6px;
         position: relative;
-        width: fit-content;
+        // width: fit-content;
 
         &::after {
           content: "";
