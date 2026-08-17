@@ -80,15 +80,15 @@
         position: relative;
         // width: fit-content;
 
-        &::after {
-          content: "";
-          position: absolute;
-          left: 0;
-          bottom: -4px;
-          width: 24px;
-          height: 2px;
-          background: var(--blue-active);
-        }
+        // &::after {
+        //   content: "";
+        //   position: absolute;
+        //   left: 0;
+        //   bottom: -4px;
+        //   width: 24px;
+        //   height: 2px;
+        //   background: var(--blue-active);
+        // }
       }
 
       a {

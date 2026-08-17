@@ -58,8 +58,13 @@ const Hero = () => {
       <div className="hero-bg-image"></div>
       <div className="hero-bg-overlay"></div>
 
+
       <div className="glow-sphere glow-1"></div>
       <div className="glow-sphere glow-2"></div>
+
+      {/* <div className="glow-sphere glow-1"></div>
+      <div className="glow-sphere glow-2"></div> */}
+ 
 
       <div className="hero-wrapper">
         <div className="hero-text" data-aos="fade-right">
@@ -113,7 +118,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
-
-
-
