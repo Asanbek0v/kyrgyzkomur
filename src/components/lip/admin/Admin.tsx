@@ -76,9 +76,7 @@ export default function Admin() {
       return;
     }
 
-    const paragraphsArray = fullText
-      .split("\n")
-      .filter((p) => p.trim() !== "");
+    const paragraphsArray = fullText.split("\n").filter((p) => p.trim() !== "");
 
     const newArticle: ArticleItem = {
       id: Date.now(),
@@ -205,7 +203,9 @@ export default function Admin() {
           </div>
 
           {/* 3. ТОЛУК ТЕКСТ ЖАНА ИЧИНДЕГИ СҮРӨТ */}
-          <div className="sectionTitle">3. Макаланын мазмуну жана ички сүрөт</div>
+          <div className="sectionTitle">
+            3. Макаланын мазмуну жана ички сүрөт
+          </div>
 
           <div className="formGroup">
             <label>Толук макаланын башы (Заголовок)</label>
