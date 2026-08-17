@@ -78,7 +78,6 @@ const Management: FC = () => {
             </div>
           </div>
 
-          {/* Оң жактагы Навигация (Sticky) */}
           <aside className="Management__sidebar">
             <div
               className="Management__sidebar-box"
