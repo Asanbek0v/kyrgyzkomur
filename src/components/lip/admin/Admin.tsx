@@ -31,7 +31,6 @@ interface UserItem {
 export default function Admin() {
   const [page, setPage] = useState(0);
 
-  // --- Жаңылык кошуу бөлүгү ---
   const [articles, setArticles] = useState<ArticleItem[]>([]);
 
   const [title, setTitle] = useState("");
@@ -166,6 +165,7 @@ export default function Admin() {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
+  const [hoveredUserId, setHoveredUserId] = useState<number | null>(null);
 
   const loadUsers = async () => {
     setUsersLoading(true);
@@ -215,6 +215,34 @@ export default function Admin() {
       loadUsers();
     } catch (err) {
       console.error("Ролду өзгөртүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+    }
+  };
+
+  const handleDeleteUser = async (userId: number) => {
+    if (
+      !confirm(
+        "Бул колдонуучуну өчүргүңүз келеби? Бул аракетти кайтарууга болбойт!",
+      )
+    )
+      return;
+
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${TEST_TOKEN}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Ката чыкты");
+        return;
+      }
+      alert("Колдонуучу өчүрүлдү!");
+      loadUsers();
+    } catch (err) {
+      console.error("Колдонуучуну өчүрүүдө ката:", err);
       alert("Backend менен байланышта ката чыкты");
     }
   };
@@ -530,13 +558,14 @@ export default function Admin() {
                   <th style={{ padding: "12px" }}>Ролу</th>
                   <th style={{ padding: "12px" }}>Катталган күнү</th>
                   <th style={{ padding: "12px" }}>Аракет</th>
+                  <th style={{ padding: "12px", width: "40px" }}></th>
                 </tr>
               </thead>
               <tbody>
                 {users.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       style={{ padding: "16px", color: "#94a3b8" }}
                     >
                       Колдонуучулар табылган жок
@@ -544,7 +573,12 @@ export default function Admin() {
                   </tr>
                 )}
                 {users.map((u) => (
-                  <tr key={u.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <tr
+                    key={u.id}
+                    onMouseEnter={() => setHoveredUserId(u.id)}
+                    onMouseLeave={() => setHoveredUserId(null)}
+                    style={{ borderBottom: "1px solid #f1f5f9" }}
+                  >
                     <td style={{ padding: "12px" }}>{u.id}</td>
                     <td style={{ padding: "12px" }}>{u.username}</td>
                     <td style={{ padding: "12px" }}>{u.email}</td>
@@ -589,7 +623,35 @@ export default function Admin() {
                         </button>
                       )}
                     </td>
-                    <td style={{ padding: "12px", cursor: "pointer" }}> X</td>
+                    <td
+                      style={{
+                        padding: "12px",
+                        textAlign: "center",
+                        width: "40px",
+                      }}
+                    >
+                      {hoveredUserId === u.id && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteUser(u.id)}
+                          title="Колдонуучуну өчүрүү"
+                          style={{
+                            background: "#fee2e2",
+                            color: "#dc2626",
+                            border: "none",
+                            width: "26px",
+                            height: "26px",
+                            borderRadius: "50%",
+                            fontSize: "14px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            lineHeight: 1,
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

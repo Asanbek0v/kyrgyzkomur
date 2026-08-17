@@ -10,7 +10,7 @@ const TopBar: FC = () => {
         <div className="TopBar">
           <div className="TopBar__actions">
             <Link
-              href="/qr-login"
+              href="/qr_login"
               className="TopBar__btn TopBar__btn--secondary"
               data-aos="fade-down"
               data-aos-duration="600"
