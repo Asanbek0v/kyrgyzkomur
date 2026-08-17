@@ -589,6 +589,7 @@ export default function Admin() {
                         </button>
                       )}
                     </td>
+                    <td style={{ padding: "12px", cursor: "pointer" }}> X</td>
                   </tr>
                 ))}
               </tbody>
