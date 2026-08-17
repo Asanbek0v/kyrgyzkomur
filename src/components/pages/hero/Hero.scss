@@ -3,7 +3,6 @@ $cyan-glow: #00d2ff;
 $blue-accent: #3a7bd5;
 $glass-border: rgba(255, 255, 255, 0.12);
 $text-light: #e2e8f0;
-
 .hero-carousel-container {
   position: relative;
   min-height: 92vh;
@@ -15,19 +14,16 @@ $text-light: #e2e8f0;
   color: #ffffff;
   overflow: hidden;
 
-  // Мобайлда бийиктигин мазмунга жараша ылайыктоо
   @media (max-width: 992px) {
     min-height: auto;
     padding: 60px 16px;
   }
 
-  /* Неон свечениялар */
   .glow-sphere {
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
     z-index: 2;
-    pointer-events: none;
 
     &.glow-1 {
       width: 400px;
@@ -47,8 +43,14 @@ $text-light: #e2e8f0;
 
     @media (max-width: 768px) {
       filter: blur(80px);
-      &.glow-1 { width: 250px; height: 250px; }
-      &.glow-2 { width: 300px; height: 300px; }
+      &.glow-1 {
+        width: 250px;
+        height: 250px;
+      }
+      &.glow-2 {
+        width: 300px;
+        height: 300px;
+      }
     }
   }
 
@@ -90,7 +92,6 @@ $text-light: #e2e8f0;
     justify-content: space-between;
     gap: 60px;
 
-    /* Планшет жана Мобайл адаптив */
     @media (max-width: 992px) {
       flex-direction: column;
       text-align: center;
@@ -102,7 +103,6 @@ $text-light: #e2e8f0;
     }
   }
 
-  /* Тексттик Блок */
   .hero-text {
     flex: 1.1;
 
@@ -143,9 +143,9 @@ $text-light: #e2e8f0;
       letter-spacing: -0.5px;
 
       .gradient-text {
-        background: linear-gradient(135deg, #ffffff 30%, $cyan-glow 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        // background: linear-gradient(135deg, #ffffff 30%, $cyan-glow 100%);
+        // -webkit-background-clip: text;
+        // -webkit-text-fill-color: transparent;
         text-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
       }
 

@@ -1,18 +1,30 @@
+"use client";
 import { FC } from "react";
 import "./Footer.scss";
 import Footerlogo from "@/src/assets/headerlogo.png";
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Footer: FC = () => {
+  const router = useRouter();
   return (
     <footer id="Footer">
       <div className="container">
         <div className="Footer">
-          <div className="Footer--left" data-aos="fade-up" data-aos-duration="800">
+          <div
+            className="Footer--left"
+            data-aos="fade-up"
+            data-aos-duration="800"
+          >
             <span className="Footer__logo">
-              <Image src={Footerlogo} alt="ОАО Кыргыз Комур" width={32} height={32} />
+              <Image
+                src={Footerlogo}
+                alt="ОАО Кыргыз Комур"
+                width={32}
+                height={32}
+              />
               ОАО «Кыргыз Комур»
             </span>
             <p>
@@ -22,30 +34,39 @@ const Footer: FC = () => {
             </p>
           </div>
 
-          <div 
-            className="Footer--center" 
-            data-aos="fade-up" 
-            data-aos-duration="800" 
+          <div
+            className="Footer--center"
+            data-aos="fade-up"
+            data-aos-duration="800"
             data-aos-delay="150"
           >
             <h2 className="Footer__title">Разделы</h2>
-            <Link href={"/товарищество"}>Товарищество</Link>
+            <Link href={"/about"}>Товарищество</Link>
             <Link href={"/management"}>Руководство</Link>
             <Link href={"/news"}>Пресс-центр</Link>
-            <Link href={"/вакансии"}>Вакансии</Link>
+            <Link href={"/vacancies"}>Вакансии</Link>
             <Link href={"/contact"}>Контакты</Link>
-            <Link href={"/сервис-центр"}>Сервис-центр</Link>
+            <Link href={"/services"}>Сервис-центр</Link>
           </div>
 
-          <div 
-            className="Footer--right" 
-            data-aos="fade-up" 
-            data-aos-duration="800" 
+          <div
+            className="Footer--right"
+            data-aos="fade-up"
+            data-aos-duration="800"
             data-aos-delay="300"
           >
-            <h2 className="Footer__title">Контакты</h2>
+            <h2
+              className="Footer__title"
+              onClick={() => router.push("/contact")}
+            >
+              Контакты
+            </h2>
 
-            <Link href="https://go.2gis.com/vJGJM" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://go.2gis.com/vJGJM"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <MapPin className="icon" size={18} />
               <span>Кыргызская Республика, г. Бишкек, Кулатова 24</span>
             </Link>
@@ -64,11 +85,11 @@ const Footer: FC = () => {
           </div>
         </div>
 
-        <div 
-          className="Footer-bottom" 
-          data-aos="fade-in" 
-          data-aos-duration="1000" 
-          data-aos-delay="400"
+        <div
+          className="Footer-bottom"
+          // data-aos="fade-up"
+          // data-aos-duration="1000"
+          // data-aos-delay="400"
         >
           <span>© 2026 ОАО «Кыргыз Комур». Все права защищены.</span>
           <span>Официальный сайт предприятия</span>

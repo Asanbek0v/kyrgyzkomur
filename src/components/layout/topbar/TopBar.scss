@@ -9,8 +9,11 @@
 #TopBar {
   background-color: var(--bg-dark);
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-
+  // border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  //   &.isScrolled {
+  //   background: var(--bg-dark-scrolled);
+  //   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  // }
   .TopBar {
     display: flex;
     justify-content: flex-end;

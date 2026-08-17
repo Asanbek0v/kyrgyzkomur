@@ -58,17 +58,15 @@ const Hero = () => {
       <div className="hero-bg-image"></div>
       <div className="hero-bg-overlay"></div>
 
-      <div className="glow-sphere glow-1"></div>
-      <div className="glow-sphere glow-2"></div>
+      {/* <div className="glow-sphere glow-1"></div>
+      <div className="glow-sphere glow-2"></div> */}
 
       <div className="hero-wrapper">
-        {/* Тексттерге солдон оңго чыгуучу (fade-right) анимациясы */}
         <div className="hero-text" data-aos="fade-right">
           <div className="badge" data-aos="fade-down" data-aos-delay="100">
             <span className="dot"></span>
             ГП «Кыргызкомур»
           </div>
-
           <h1 data-aos="fade-up" data-aos-delay="200">
             Тепло и уют в ваш дом: <br />
             <span className="gradient-text">Отборный уголь</span> с доставкой
@@ -87,7 +85,6 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* 3D Карусель блогуна оңдон чыгуу же чоңоюп чыгуу эффектиси */}
         <div
           className="carousel-3d-scene"
           data-aos="fade-left"
