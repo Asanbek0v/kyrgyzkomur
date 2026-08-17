@@ -2,34 +2,6 @@
 import AOS from "aos";
 import "aos/dist/aos.css";
 import "./NewHero.scss";
-import { useEffect, useState } from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface Product {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  date: string;
-}
-
-const NewHero = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const res = await fetch(`${API_URL}/products/get`);
-        const data = await res.json();
-        setProducts(data);
-      } catch (err) {
-        console.error("Жүктөөдө ката:", err);
-      }
-    };
-    loadProducts();
-  }, []);
-
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -42,7 +14,11 @@ const NewHero = () => {
     }, 500);
 
     return () => clearTimeout(timer);
+
   }, [products]);
+
+  }, []);
+
 
   return (
     <section id="newHero">
@@ -58,7 +34,11 @@ const NewHero = () => {
           </a>
         </div>
 
+
         <div className="newHero" >
+
+        <div className="newHero">
+
           {products.map((item, index) => (
             <article
               className="newHero__card"
@@ -66,6 +46,7 @@ const NewHero = () => {
               data-aos="fade-up"
               data-aos-delay={index * 150}
             >
+
               <div
                 className="newHero__image"
                 data-aos="zoom-in"
@@ -73,16 +54,27 @@ const NewHero = () => {
               >
                 <img
                   src={item.image}
+
                   alt={item.title}
                   onLoad={() => AOS.refresh()} 
                 />
                 <span>НОВОСТИ</span>
+
+                  alt={item.name}
+                  onLoad={() => AOS.refresh()} // Сүрөт жүктөлөрү менен анимацияны жаңыртуу
+                />
+                <span>{item.category}</span>
+
               </div>
 
               <div className="newHero__content">
                 <div className="newHero__date">
                   <span>📅</span>
+
                   {new Date(item.date).toLocaleDateString("ru-RU")}
+
+                  {item.date}
+
                 </div>
 
                 <h3>{item.title}</h3>
