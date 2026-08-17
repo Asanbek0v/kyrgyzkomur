@@ -65,6 +65,11 @@ $bg-light: #f8fafc;
     .flex2 {
       flex: 2;
     }
+
+    @media (max-width: 530px) {
+    display: flex;
+    flex-direction: column;
+  }
   }
 
   .formGroup {
@@ -99,7 +104,6 @@ $bg-light: #f8fafc;
     }
   }
 
-  /* ТАБДАР (Папкадан же Ссылкадан тандоо) */
   .modeTabs {
     display: flex;
     gap: 8px;
@@ -122,7 +126,6 @@ $bg-light: #f8fafc;
     }
   }
 
-  /* ССЫЛКА КИРГИЗҮҮ БӨЛҮМҮ */
   .urlInputBox {
     display: flex;
     gap: 10px;
@@ -142,7 +145,7 @@ $bg-light: #f8fafc;
     }
   }
 
-  /* ФАЙЛ ТАНДОО БӨЛҮМҮ */
+  
   .fileDropzone {
     input[type="file"] {
       display: none;
@@ -281,7 +284,6 @@ $bg-light: #f8fafc;
   }
 }
 
-/* САЙТТА КӨРҮНҮҮЧҮ КАРТОЧКА */
 .livePreview {
   h3 {
     font-size: 16px;

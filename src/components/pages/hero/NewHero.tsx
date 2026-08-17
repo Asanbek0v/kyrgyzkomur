@@ -58,7 +58,7 @@ const NewHero = () => {
           </a>
         </div>
 
-        <div className="newHero">
+        <div className="newHero" >
           {products.map((item, index) => (
             <article
               className="newHero__card"

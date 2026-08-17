@@ -4,7 +4,7 @@ import React from "react";
 const login = () => {
   return (
     <div>
-      <Admin />
+      <Admin /> 
     </div>
   );
 };
