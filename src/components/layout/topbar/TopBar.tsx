@@ -5,34 +5,30 @@ import "./TopBar.scss";
 
 const TopBar: FC = () => {
   return (
-    <div 
-      id="TopBar"
-      data-aos="fade-down"
-      data-aos-duration="600"
-    >
+    <div id="TopBar" data-aos="fade-down" data-aos-duration="600">
       <div className="container">
-        <div className="TopBar__wrapper">
+        <div className="TopBar">
           <div className="TopBar__actions">
-            <Link 
-              href="/qr-login" 
-              className="TopBar__btn"
+            <Link
+              href="/qr-login"
+              className="TopBar__btn TopBar__btn--secondary"
               data-aos="fade-down"
               data-aos-duration="600"
               data-aos-delay="100"
             >
+              <QrCode size={18} />
               <span>БОРБОР — QR ВХОД</span>
-              <QrCode size={16} />
             </Link>
 
-            <Link 
-              href="/login" 
-              className="TopBar__btn"
+            <Link
+              href="/login"
+              className="TopBar__btn TopBar__btn--primary"
               data-aos="fade-down"
               data-aos-duration="600"
               data-aos-delay="200"
             >
+              <LogIn size={18} />
               <span>ВОЙТИ</span>
-              <LogIn size={16} />
             </Link>
           </div>
         </div>

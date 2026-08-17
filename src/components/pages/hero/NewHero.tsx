@@ -1,5 +1,8 @@
-import React from "react";
+"use client";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import "./NewHero.scss";
+import { useEffect } from "react";
 
 const products = [
   {
@@ -32,13 +35,24 @@ const products = [
 ];
 
 const NewHero = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: true,
+      easing: "ease-in-out",
+    });
 
+    const timer = setTimeout(() => {
+      AOS.refresh();
+    }, 500);
 
-  
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section id="newHero">
       <div className="container">
-        <div className="newHero__top">
+        <div className="newHero__top" data-aos="fade-down">
           <div>
             <h2>НОВОСТИ И ПРЕСС-ЦЕНТР</h2>
             <span></span>
@@ -50,17 +64,30 @@ const NewHero = () => {
         </div>
 
         <div className="newHero">
-          {products.map((item) => (
-            <article className="newHero__card" key={item.id}>
-              <div className="newHero__image">
-                <img src={item.image} alt={item.name} />
-
+          {products.map((item, index) => (
+            <article
+              className="newHero__card"
+              key={item.id}
+              data-aos="fade-up"
+              data-aos-delay={index * 150}
+            >
+              {/* Сүрөттүн өзүнө өзүнчө zoom-in анимациясын коштук */}
+              <div
+                className="newHero__image"
+                data-aos="zoom-in"
+                data-aos-delay={index * 150 + 100}
+              >
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  onLoad={() => AOS.refresh()} // Сүрөт жүктөлөрү менен анимацияны жаңыртуу
+                />
                 <span>{item.category}</span>
               </div>
 
               <div className="newHero__content">
                 <div className="newHero__date">
-                  <span>▣</span>
+                  <span>📅</span>
                   {item.date}
                 </div>
 
