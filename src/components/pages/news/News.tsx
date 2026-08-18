@@ -1,6 +1,7 @@
 "use client";
 import { FC, useEffect, useState } from "react";
 import "./News.scss";
+import NewHero from "../hero/NewHero";
 
 interface Product {
   id: number;
@@ -15,7 +16,6 @@ const News: FC = () => {
 
   useEffect(() => {
     const loadProducts = async () => {
-      // 1. .env туура иштеп жатабы?
       console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
       try {
@@ -25,7 +25,6 @@ const News: FC = () => {
         const res = await fetch(apiUrl);
         const data = await res.json();
 
-        // 2. Бэкендден маалымат келдиби?
         console.log("Серверден келген маалымат:", data);
 
         setProducts(data);
@@ -49,6 +48,7 @@ const News: FC = () => {
               <span>{item.date}</span>
             </div>
           ))}
+          <NewHero />
         </div>
       </div>
     </section>

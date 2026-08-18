@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Admin.scss";
+
+const TEST_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhZG1pbjIiLCJlbWFpbCI6ImFkbWluMkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4Njk1MjM5MSwiZXhwIjoxNzg3MDM4NzkxfQ.5DCJa2WgV3H3CENEs1h529K5uzL1mOJIHfNxEemROFA";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ArticleItem {
   id: number;
@@ -15,27 +20,60 @@ interface ArticleItem {
   paragraphs: string[];
 }
 
+interface UserItem {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}
+
 export default function Admin() {
+  const [page, setPage] = useState(0);
+
   const [articles, setArticles] = useState<ArticleItem[]>([]);
 
-  // Текст талаалары
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("НОВОСТИ");
   const [excerpt, setExcerpt] = useState("");
   const [fullTitle, setFullTitle] = useState("");
   const [fullText, setFullText] = useState("");
+  const [date, setDate] = useState(
+    () => new Date().toISOString().split("T")[0],
+  );
+  const today = new Date().toISOString().split("T")[0];
 
-  // 1. БАШКЫ СҮРӨТ (Файл же Ссылка)
   const [mainImgMode, setMainImgMode] = useState<"file" | "url">("file");
   const [mainImage, setMainImage] = useState<string>("");
   const [mainImageUrlInput, setMainImageUrlInput] = useState<string>("");
 
-  // 2. ИЧИНДЕГИ СҮРӨТ (Файл же Ссылка)
   const [contentImgMode, setContentImgMode] = useState<"file" | "url">("file");
   const [contentImage, setContentImage] = useState<string>("");
   const [contentImageUrlInput, setContentImageUrlInput] = useState<string>("");
 
-  // Башкы сүрөттү файлдан жүктөө
+  const loadFromBackend = async () => {
+    try {
+      const res = await fetch(`${API_URL}/products/get`);
+      const data = await res.json();
+      const mapped: ArticleItem[] = data.map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        category: "НОВОСТИ",
+        excerpt: p.description,
+        mainImage: p.image || "",
+        contentImage: "",
+        date: p.date
+          ? new Date(p.date).toLocaleDateString("ru-RU")
+          : new Date().toLocaleDateString("ru-RU"),
+        fullTitle: p.title,
+        paragraphs: [p.description],
+      }));
+      setArticles(mapped);
+    } catch (err) {
+      console.error("Жүктөөдө ката:", err);
+    }
+  };
+
   const handleMainFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -43,7 +81,6 @@ export default function Admin() {
     }
   };
 
-  // Башкы сүрөттү ссылка аркылуу кошуу
   const handleMainUrlAdd = () => {
     if (mainImageUrlInput.trim()) {
       setMainImage(mainImageUrlInput.trim());
@@ -51,7 +88,6 @@ export default function Admin() {
     }
   };
 
-  // Ичиндеги сүрөттү файлдан жүктөө
   const handleContentFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -59,7 +95,6 @@ export default function Admin() {
     }
   };
 
-  // Ичиндеги сүрөттү ссылка аркылуу кошуу
   const handleContentUrlAdd = () => {
     if (contentImageUrlInput.trim()) {
       setContentImage(contentImageUrlInput.trim());
@@ -67,8 +102,7 @@ export default function Admin() {
     }
   };
 
-  // Форманы жөнөтүү
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title || !excerpt || !fullTitle || !fullText || !mainImage) {
@@ -77,6 +111,34 @@ export default function Admin() {
     }
 
     const paragraphsArray = fullText.split("\n").filter((p) => p.trim() !== "");
+<<<<<<< HEAD
+=======
+
+    try {
+      const res = await fetch(`${API_URL}/products/post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TEST_TOKEN}`,
+        },
+        body: JSON.stringify({
+          title,
+          description: excerpt,
+          image: mainImage,
+          date: date ? new Date(date).toISOString() : new Date().toISOString(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Backend'ге сактоодо ката чыкты");
+        return;
+      }
+    } catch (err) {
+      console.error("Backend'ге жиберүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+      return;
+    }
+>>>>>>> 199c6910fc0f88e3a077e2a9569415cc9866850d
 
     const newArticle: ArticleItem = {
       id: Date.now(),
@@ -92,21 +154,121 @@ export default function Admin() {
 
     setArticles([newArticle, ...articles]);
 
-    // Талааларды тазалоо
     setTitle("");
     setExcerpt("");
     setFullTitle("");
     setFullText("");
     setMainImage("");
     setContentImage("");
+    setDate(today);
     alert("Жаңылык ийгиликтүү кошулду!");
   };
 
+  // --- Колдонуучулар бөлүгү ---
+  const [users, setUsers] = useState<UserItem[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
+  const [hoveredUserId, setHoveredUserId] = useState<number | null>(null);
+
+  const loadUsers = async () => {
+    setUsersLoading(true);
+    setUsersError("");
+    try {
+      const res = await fetch(`${API_URL}/admin/panel`, {
+        headers: {
+          Authorization: `Bearer ${TEST_TOKEN}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setUsersError(data.message || "Ката чыкты");
+        return;
+      }
+      setUsers(data.allUsers || []);
+    } catch (err) {
+      console.error("Колдонуучуларды жүктөөдө ката:", err);
+      setUsersError("Backend менен байланышта ката чыкты");
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const handleRoleChange = async (userId: number, newRole: string) => {
+    const confirmMsg =
+      newRole === "ADMIN"
+        ? "Бул колдонуучуга АДМИН укугун бергиңиз келеби?"
+        : "Бул колдонуучудан АДМИН укугун алып салгыңыз келеби?";
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TEST_TOKEN}`,
+        },
+        body: JSON.stringify({ role: newRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Ката чыкты");
+        return;
+      }
+      alert("Ролу ийгиликтүү өзгөртүлдү!");
+      loadUsers();
+    } catch (err) {
+      console.error("Ролду өзгөртүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+    }
+  };
+
+  const handleDeleteUser = async (userId: number) => {
+    if (
+      !confirm(
+        "Бул колдонуучуну өчүргүңүз келеби? Бул аракетти кайтарууга болбойт!",
+      )
+    )
+      return;
+
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${TEST_TOKEN}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Ката чыкты");
+        return;
+      }
+      alert("Колдонуучу өчүрүлдү!");
+      loadUsers();
+    } catch (err) {
+      console.error("Колдонуучуну өчүрүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+    }
+  };
+
+  useEffect(() => {
+    loadFromBackend();
+  }, []);
+
+  // Колдонуучулар бетине өткөндө маалыматты жүктөө
+  useEffect(() => {
+    if (page === 1) {
+      loadUsers();
+    }
+  }, [page]);
+
   return (
     <div className="adminDashboard">
-      <header className="dashboardHeader">
+      <div className="dashboardHeader">
         <h1>
-          Панель управления <span>/ Жаңылык кошуу</span>
+          Панель управления{" "}
+          <span>
+            {page === 0 ? "/ Жаңылык кошуу" : "/ Катталган колдонуучулар"}
+          </span>
         </h1>
       </header>
 
@@ -285,42 +447,398 @@ export default function Admin() {
 
           <button type="submit" className="saveBtn">
             Жаңылыкты сайтка чыгаруу
+        <nav style={{ marginTop: "12px" }}>
+          <button
+            type="button"
+            onClick={() => setPage(0)}
+            style={{
+              marginRight: "16px",
+              fontWeight: 600,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: page === 0 ? "#2563eb" : "#475569",
+              textDecoration: page === 0 ? "underline" : "none",
+              fontSize: "14px",
+              padding: 0,
+            }}
+          >
+            Жаңылык кошуу
           </button>
-        </form>
+          <button
+            type="button"
+            onClick={() => setPage(1)}
+            style={{
+              fontWeight: 600,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: page === 1 ? "#2563eb" : "#475569",
+              textDecoration: page === 1 ? "underline" : "none",
+              fontSize: "14px",
+              padding: 0,
+            }}
+          >
+            Колдонуучулар
+          </button>
+        </nav>
+      </div>
 
-        {/* САЙТТА КӨРҮНҮШҮ (PREVIEW) */}
-        <div className="livePreview">
-          <h3>Сайттагы көрүнүшү:</h3>
-          {articles.length === 0 ? (
-            <p className="emptyText">Азырынча кошула элек...</p>
-          ) : (
-            articles.map((item) => (
-              <div className="card" key={item.id}>
-                <div className="imageBox">
-                  <img src={item.mainImage} alt={item.title} />
-                  <span className="badge">{item.category}</span>
-                </div>
-                <div className="bodyBox">
-                  <h2 className="title">{item.title}</h2>
-                  <p className="excerpt">{item.excerpt}</p>
+      {page === 0 ? (
+        <div className="adminGrid">
+          <form
+            className="modernForm"
+            onSubmit={handleSubmit}
+            data-aos="fade-up"
+            data-aos-duration="3000"
+          >
+            <div className="sectionTitle">1. Негизги маалыматтар</div>
 
-                  {/* Макаланын ички сүрөтү бар болсо көрсөтүү */}
-                  {item.contentImage && (
-                    <div className="innerImgBox">
-                      <img src={item.contentImage} alt="Inner content" />
-                    </div>
-                  )}
-
-                  <span className="readMore">КЕНЕНИРЭЭК ОКУУ »</span>
-                </div>
-                <div className="footerBox">
-                  <span>{item.date}</span> • <span>Комментарийлер жок</span>
-                </div>
+            <div className="formRow">
+              <div className="formGroup flex1">
+                <label>Категория</label>
+                <input
+                  type="text"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                />
               </div>
-            ))
+              <div className="formGroup flex2">
+                <label>Заголовок (Карточкадагы аты)</label>
+                <input
+                  type="text"
+                  placeholder="Мисалы: Көмүр кампаларда сатылып баштады"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="formGroup">
+              <label>Датасы</label>
+              <input
+                type="date"
+                value={date}
+                min={today}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
+
+            <div className="formGroup">
+              <label>Кыскача сүрөттөмөсү</label>
+              <textarea
+                rows={2}
+                placeholder="«Кыргызкөмүр» кампаларда калкка көмүр сатууну баштады..."
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+              />
+            </div>
+
+            <div className="sectionTitle">2. Башкы сүрөт (Главное фото)</div>
+
+            <div className="formGroup">
+              <div className="modeTabs">
+                <button
+                  type="button"
+                  className={mainImgMode === "file" ? "active" : ""}
+                  onClick={() => setMainImgMode("file")}
+                >
+                  📁 Папкадан таңдоо
+                </button>
+                <button
+                  type="button"
+                  className={mainImgMode === "url" ? "active" : ""}
+                  onClick={() => setMainImgMode("url")}
+                >
+                  🔗 Ссылка чаптоо
+                </button>
+              </div>
+
+              {mainImgMode === "file" ? (
+                <div className="fileDropzone">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="mainFileInput"
+                    onChange={handleMainFileSelect}
+                  />
+                  <label htmlFor="mainFileInput" className="dropzoneLabel">
+                    📷 Папкадан башкы сүрөт тандоо
+                  </label>
+                </div>
+              ) : (
+                <div className="urlInputBox">
+                  <input
+                    type="text"
+                    placeholder="https://site.com/image.jpg"
+                    value={mainImageUrlInput}
+                    onChange={(e) => setMainImageUrlInput(e.target.value)}
+                  />
+                  <button type="button" onClick={handleMainUrlAdd}>
+                    Кошуу
+                  </button>
+                </div>
+              )}
+
+              {mainImage && (
+                <div className="previewBox">
+                  <img src={mainImage} alt="Main Preview" />
+                  <button type="button" onClick={() => setMainImage("")}>
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="sectionTitle">
+              3. Макаланын мазмуну жана ички сүрөт
+            </div>
+
+            <div className="formGroup">
+              <label>Толук макаланын башы (Заголовок)</label>
+              <input
+                type="text"
+                placeholder="Кышка даярдык эрте башталды: калк үчүн көмүр даяр"
+                value={fullTitle}
+                onChange={(e) => setFullTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="formGroup">
+              <label>Толук текст</label>
+              <textarea
+                rows={5}
+                placeholder="Ар бир абзацты жаңы саптан жазыңыз..."
+                value={fullText}
+                onChange={(e) => setFullText(e.target.value)}
+              />
+            </div>
+
+            <div className="formGroup">
+              <label>Макаланын ичине сүрөт кошуу (Опционально)</label>
+              <div className="modeTabs">
+                <button
+                  type="button"
+                  className={contentImgMode === "file" ? "active" : ""}
+                  onClick={() => setContentImgMode("file")}
+                >
+                  📁 Папкадан таңдоо
+                </button>
+                <button
+                  type="button"
+                  className={contentImgMode === "url" ? "active" : ""}
+                  onClick={() => setContentImgMode("url")}
+                >
+                  🔗 Ссылка чаптоо
+                </button>
+              </div>
+
+              {contentImgMode === "file" ? (
+                <div className="fileDropzone">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="contentFileInput"
+                    onChange={handleContentFileSelect}
+                  />
+                  <label htmlFor="contentFileInput" className="dropzoneLabel">
+                    🖼️ Ички сүрөттү файлдан тандоо
+                  </label>
+                </div>
+              ) : (
+                <div className="urlInputBox">
+                  <input
+                    type="text"
+                    placeholder="https://site.com/inner-photo.jpg"
+                    value={contentImageUrlInput}
+                    onChange={(e) => setContentImageUrlInput(e.target.value)}
+                  />
+                  <button type="button" onClick={handleContentUrlAdd}>
+                    Кошуу
+                  </button>
+                </div>
+              )}
+
+              {contentImage && (
+                <div className="previewBox">
+                  <img src={contentImage} alt="Content Preview" />
+                  <button type="button" onClick={() => setContentImage("")}>
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <button type="submit" className="saveBtn">
+              Жаңылыкты сайтка чыгаруу
+            </button>
+          </form>
+
+          <div
+            className="livePreview"
+            data-aos="fade-up"
+            data-aos-duration="3000"
+          >
+            <h3>Сайттагы көрүнүшү:</h3>
+            {articles.length === 0 ? (
+              <p className="emptyText">Азырынча кошула элек...</p>
+            ) : (
+              articles.map((item) => (
+                <div className="card" key={item.id}>
+                  <div className="imageBox">
+                    <img src={item.mainImage} alt={item.title} />
+                    <span className="badge">{item.category}</span>
+                  </div>
+                  <div className="bodyBox">
+                    <h2 className="title">{item.title}</h2>
+                    <p className="excerpt">{item.excerpt}</p>
+
+                    {item.contentImage && (
+                      <div className="innerImgBox">
+                        <img src={item.contentImage} alt="Inner content" />
+                      </div>
+                    )}
+
+                    <span className="readMore">КЕНЕНИРЭЭК ОКУУ »</span>
+                  </div>
+                  <div className="footerBox">
+                    <span>{item.date}</span> • <span>Комментарийлер жок</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ) : (
+        <div style={{ marginTop: "20px" }}>
+          {usersLoading && <p>Жүктөлүп жатат...</p>}
+          {usersError && <p style={{ color: "red" }}>{usersError}</p>}
+
+          {!usersLoading && !usersError && (
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                background: "#fff",
+                borderRadius: "12px",
+                overflow: "hidden",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.03)",
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    borderBottom: "2px solid #e2e8f0",
+                    textAlign: "left",
+                  }}
+                >
+                  <th style={{ padding: "12px" }}>ID</th>
+                  <th style={{ padding: "12px" }}>Колдонуучу аты</th>
+                  <th style={{ padding: "12px" }}>Email</th>
+                  <th style={{ padding: "12px" }}>Ролу</th>
+                  <th style={{ padding: "12px" }}>Катталган күнү</th>
+                  <th style={{ padding: "12px" }}>Аракет</th>
+                  <th style={{ padding: "12px", width: "40px" }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      style={{ padding: "16px", color: "#94a3b8" }}
+                    >
+                      Колдонуучулар табылган жок
+                    </td>
+                  </tr>
+                )}
+                {users.map((u) => (
+                  <tr
+                    key={u.id}
+                    onMouseEnter={() => setHoveredUserId(u.id)}
+                    onMouseLeave={() => setHoveredUserId(null)}
+                    style={{ borderBottom: "1px solid #f1f5f9" }}
+                  >
+                    <td style={{ padding: "12px" }}>{u.id}</td>
+                    <td style={{ padding: "12px" }}>{u.username}</td>
+                    <td style={{ padding: "12px" }}>{u.email}</td>
+                    <td style={{ padding: "12px" }}>{u.role}</td>
+                    <td style={{ padding: "12px" }}>
+                      {new Date(u.createdAt).toLocaleDateString("ru-RU")}
+                    </td>
+                    <td style={{ padding: "12px" }}>
+                      {u.role === "ADMIN" ? (
+                        <button
+                          type="button"
+                          onClick={() => handleRoleChange(u.id, "USER")}
+                          style={{
+                            background: "#f1f5f9",
+                            color: "#0f172a",
+                            border: "none",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Админдиктен алуу
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleRoleChange(u.id, "ADMIN")}
+                          style={{
+                            background: "#2563eb",
+                            color: "#fff",
+                            border: "none",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Админ кылуу
+                        </button>
+                      )}
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px",
+                        textAlign: "center",
+                        width: "40px",
+                      }}
+                    >
+                      {hoveredUserId === u.id && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteUser(u.id)}
+                          title="Колдонуучуну өчүрүү"
+                          style={{
+                            background: "#fee2e2",
+                            color: "#dc2626",
+                            border: "none",
+                            width: "26px",
+                            height: "26px",
+                            borderRadius: "50%",
+                            fontSize: "14px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            lineHeight: 1,
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

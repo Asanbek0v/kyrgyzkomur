@@ -18,7 +18,7 @@ const ChatWidget: FC = () => {
 
   const phone = "996704210706";
   const message = encodeURIComponent(
-    "Здравствуйте! Я хотел бы получить информацию об угле.",
+    "Здравствуйте! Я хотел бы получить  информацию об угле.",
   );
   const waUrl = `https://wa.me/${phone}?text=${message}`;
 
