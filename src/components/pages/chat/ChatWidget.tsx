@@ -85,14 +85,14 @@ const ChatWidget: FC = () => {
                   type="button"
                   onClick={handleClose}
                   className="ChatWidget--window_close"
-                  aria-label="Жабуу"
+                  aria-label="Закрыть"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               <div className="ChatWidget--language_body">
-                <p>Сайтты кайсы тилге которобуз?</p>
+                <p>На какой язык нам следует перевести сайт?</p>
 
                 <button
                   type="button"

@@ -3,9 +3,6 @@
 import React, { useState, useEffect } from "react";
 import "./Admin.scss";
 
-const TEST_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhZG1pbjIiLCJlbWFpbCI6ImFkbWluMkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4Njk1MjM5MSwiZXhwIjoxNzg3MDM4NzkxfQ.5DCJa2WgV3H3CENEs1h529K5uzL1mOJIHfNxEemROFA";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ArticleItem {
@@ -111,15 +108,15 @@ export default function Admin() {
     }
 
     const paragraphsArray = fullText.split("\n").filter((p) => p.trim() !== "");
-<<<<<<< HEAD
-=======
 
     try {
       const res = await fetch(`${API_URL}/products/post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          // TODO: заменить на реальный токен из аутентификации пользователя,
+          // а не захардкоженное значение
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
         body: JSON.stringify({
           title,
@@ -138,7 +135,6 @@ export default function Admin() {
       alert("Backend менен байланышта ката чыкты");
       return;
     }
->>>>>>> 199c6910fc0f88e3a077e2a9569415cc9866850d
 
     const newArticle: ArticleItem = {
       id: Date.now(),
@@ -164,7 +160,6 @@ export default function Admin() {
     alert("Жаңылык ийгиликтүү кошулду!");
   };
 
-  // --- Колдонуучулар бөлүгү ---
   const [users, setUsers] = useState<UserItem[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
@@ -176,7 +171,7 @@ export default function Admin() {
     try {
       const res = await fetch(`${API_URL}/admin/panel`, {
         headers: {
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
       });
       const data = await res.json();
@@ -205,7 +200,7 @@ export default function Admin() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
         body: JSON.stringify({ role: newRole }),
       });
@@ -234,7 +229,7 @@ export default function Admin() {
       const res = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
       });
       const data = await res.json();
@@ -254,7 +249,6 @@ export default function Admin() {
     loadFromBackend();
   }, []);
 
-  // Колдонуучулар бетине өткөндө маалыматты жүктөө
   useEffect(() => {
     if (page === 1) {
       loadUsers();
@@ -270,183 +264,7 @@ export default function Admin() {
             {page === 0 ? "/ Жаңылык кошуу" : "/ Катталган колдонуучулар"}
           </span>
         </h1>
-      </header>
 
-      <div className="adminGrid">
-        <form className="modernForm" onSubmit={handleSubmit}>
-          {/* 1. НЕГИЗГИ МААЛЫМАТТАР */}
-          <div className="sectionTitle">1. Негизги маалыматтар</div>
-
-          <div className="formRow">
-            <div className="formGroup flex1">
-              <label>Категория</label>
-              <input
-                type="text"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              />
-            </div>
-            <div className="formGroup flex2">
-              <label>Заголовок (Карточкадагы аты)</label>
-              <input
-                type="text"
-                placeholder="Мисалы: Көмүр кампаларда сатылып баштады"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="formGroup">
-            <label>Кыскача сүрөттөмөсү</label>
-            <textarea
-              rows={2}
-              placeholder="«Кыргызкөмүр» кампаларда калкка көмүр сатууну баштады..."
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-            />
-          </div>
-
-          {/* 2. БАШКЫ СҮРӨТ (Файл же Ссылка) */}
-          <div className="sectionTitle">2. Башкы сүрөт (Главное фото)</div>
-
-          <div className="formGroup">
-            <div className="modeTabs">
-              <button
-                type="button"
-                className={mainImgMode === "file" ? "active" : ""}
-                onClick={() => setMainImgMode("file")}
-              >
-                📁 Папкадан таңдоо
-              </button>
-              <button
-                type="button"
-                className={mainImgMode === "url" ? "active" : ""}
-                onClick={() => setMainImgMode("url")}
-              >
-                🔗 Ссылка чаптоо
-              </button>
-            </div>
-
-            {mainImgMode === "file" ? (
-              <div className="fileDropzone">
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="mainFileInput"
-                  onChange={handleMainFileSelect}
-                />
-                <label htmlFor="mainFileInput" className="dropzoneLabel">
-                  📷 Папкадан башкы сүрөт тандоо
-                </label>
-              </div>
-            ) : (
-              <div className="urlInputBox">
-                <input
-                  type="text"
-                  placeholder="https://site.com/image.jpg"
-                  value={mainImageUrlInput}
-                  onChange={(e) => setMainImageUrlInput(e.target.value)}
-                />
-                <button type="button" onClick={handleMainUrlAdd}>
-                  Кошуу
-                </button>
-              </div>
-            )}
-
-            {mainImage && (
-              <div className="previewBox">
-                <img src={mainImage} alt="Main Preview" />
-                <button type="button" onClick={() => setMainImage("")}>
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* 3. ТОЛУК ТЕКСТ ЖАНА ИЧИНДЕГИ СҮРӨТ */}
-          <div className="sectionTitle">
-            3. Макаланын мазмуну жана ички сүрөт
-          </div>
-
-          <div className="formGroup">
-            <label>Толук макаланын башы (Заголовок)</label>
-            <input
-              type="text"
-              placeholder="Кышка даярдык эрте башталды: калк үчүн көмүр даяр"
-              value={fullTitle}
-              onChange={(e) => setFullTitle(e.target.value)}
-            />
-          </div>
-
-          <div className="formGroup">
-            <label>Толук текст</label>
-            <textarea
-              rows={5}
-              placeholder="Ар бир абзацты жаңы саптан жазыңыз..."
-              value={fullText}
-              onChange={(e) => setFullText(e.target.value)}
-            />
-          </div>
-
-          {/* Макаланын ичине кошулуучу сүрөт */}
-          <div className="formGroup">
-            <label>Макаланын ичине сүрөт кошуу (Опционально)</label>
-            <div className="modeTabs">
-              <button
-                type="button"
-                className={contentImgMode === "file" ? "active" : ""}
-                onClick={() => setContentImgMode("file")}
-              >
-                📁 Папкадан таңдоо
-              </button>
-              <button
-                type="button"
-                className={contentImgMode === "url" ? "active" : ""}
-                onClick={() => setContentImgMode("url")}
-              >
-                🔗 Ссылка чаптоо
-              </button>
-            </div>
-
-            {contentImgMode === "file" ? (
-              <div className="fileDropzone">
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="contentFileInput"
-                  onChange={handleContentFileSelect}
-                />
-                <label htmlFor="contentFileInput" className="dropzoneLabel">
-                  🖼️ Ички сүрөттү файлдан тандоо
-                </label>
-              </div>
-            ) : (
-              <div className="urlInputBox">
-                <input
-                  type="text"
-                  placeholder="https://site.com/inner-photo.jpg"
-                  value={contentImageUrlInput}
-                  onChange={(e) => setContentImageUrlInput(e.target.value)}
-                />
-                <button type="button" onClick={handleContentUrlAdd}>
-                  Кошуу
-                </button>
-              </div>
-            )}
-
-            {contentImage && (
-              <div className="previewBox">
-                <img src={contentImage} alt="Content Preview" />
-                <button type="button" onClick={() => setContentImage("")}>
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-
-          <button type="submit" className="saveBtn">
-            Жаңылыкты сайтка чыгаруу
         <nav style={{ marginTop: "12px" }}>
           <button
             type="button"

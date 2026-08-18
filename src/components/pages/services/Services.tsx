@@ -48,11 +48,10 @@ const Services: FC = () => {
       const result = await res.json();
 
       if (!res.ok) {
-        setLoginError(result.message || "Email же сырсөз туура эмес!");
+        setLoginError(result.message || "Неверный логин или пароль!");
         return;
       }
 
-      // Токенди сактоо
       if (data.rememberMe) {
         localStorage.setItem("token", result.token);
       } else {
@@ -62,15 +61,14 @@ const Services: FC = () => {
 
       reset();
 
-      // Админ болсо админ панелге, болбосо башкы бетке
       if (result.user?.role === "ADMIN") {
         router.push("/admin");
       } else {
         router.push("/");
       }
     } catch (err) {
-      console.error("Login ката:", err);
-      setLoginError("Backend менен байланышта ката чыкты");
+      console.error("Ошибка входа:", err);
+      setLoginError("Ошибка связи с бэкендом");
     }
   };
 
