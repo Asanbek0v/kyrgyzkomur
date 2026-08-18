@@ -49,17 +49,18 @@ const Services: FC = () => {
       const result = await res.json();
 
       if (!res.ok) {
-        setLoginError(result.message || "Email же сырсөз туура эмес!");
+        setLoginError(result.message || "Неверный логин или пароль!");
         return;
       }
 
-      // TopBar ар дайым localStorage'дан окуйт, ошондуктан токенди
-      // "эстеп калуу" тандалганбы же жокпу дегенге карабай
-      // ар дайым localStorage'га сактайбыз.
       localStorage.setItem("token", result.token);
+      if (data.rememberMe) {
+        localStorage.setItem("token", result.token);
+      } else {
+        sessionStorage.setItem("token", result.token);
+      }
       localStorage.setItem("user", JSON.stringify(result.user));
 
-      // TopBar'га токен өзгөргөнүн дароо кабарлайбыз
       window.dispatchEvent(new Event("authChange"));
 
       reset();
@@ -70,8 +71,8 @@ const Services: FC = () => {
         router.push("/");
       }
     } catch (err) {
-      console.error("Login ката:", err);
-      setLoginError("Backend менен байланышта ката чыкты");
+      console.error("Ошибка входа:", err);
+      setLoginError("Ошибка связи с бэкендом");
     }
   };
 
