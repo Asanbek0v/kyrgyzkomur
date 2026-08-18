@@ -4,20 +4,43 @@ import { FC, useState } from "react";
 import { BotMessageSquare, X } from "lucide-react";
 import "./ChatWidget.scss";
 import { useTranslatePage } from "@/src/api/useTranslate";
+import whatsApp from "@/src/assets/WhatsApp_Logo_green.svg.webp";
+import Image from "next/image";
 
 type Language = "ky" | "ru";
+type ChatMode = "translate" | null;
 
 const ChatWidget: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeMode, setActiveMode] = useState<ChatMode>(null);
 
   const { mutate: translatePage } = useTranslatePage();
 
+  const phone = "996704210706";
+  const message = encodeURIComponent(
+    "Здравствуйте! Я хотел бы получить информацию об угле.",
+  );
+  const waUrl = `https://wa.me/${phone}?text=${message}`;
+
   const handleMainButton = () => {
+    if (activeMode) {
+      handleClose();
+      return;
+    }
     setIsOpen((prev) => !prev);
+  };
+
+  const handleMode = (mode: ChatMode) => {
+    setActiveMode(mode);
   };
 
   const handleLanguage = (lang: Language) => {
     translatePage(lang);
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setActiveMode(null);
     setIsOpen(false);
   };
 
@@ -25,7 +48,31 @@ const ChatWidget: FC = () => {
     <section id="ChatWidget">
       <div className="container">
         <div className="ChatWidget">
-          {isOpen && (
+          {isOpen && !activeMode && (
+            <div className="ChatWidget--options">
+              <button
+                type="button"
+                className="ChatWidget--options_translate"
+                onClick={() => handleMode("translate")}
+              >
+                <span>🌐</span>
+                <p>Переводчик</p>
+              </button>
+
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ChatWidget--options_bot"
+                onClick={handleClose}
+              >
+                <Image src={whatsApp} alt="logo" width={20} height={20} />
+                <p>WhatsApp</p>
+              </a>
+            </div>
+          )}
+
+          {activeMode === "translate" && (
             <div className="ChatWidget--language">
               <div className="ChatWidget--language_header">
                 <div>
@@ -34,7 +81,7 @@ const ChatWidget: FC = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleClose}
                   className="ChatWidget--window_close"
                   aria-label="Жабуу"
                 >
@@ -74,11 +121,15 @@ const ChatWidget: FC = () => {
 
           <button
             type="button"
-            className={`ChatWidget--main ${isOpen ? "active" : ""}`}
+            className={`ChatWidget--main ${isOpen || activeMode ? "active" : ""}`}
             onClick={handleMainButton}
-            aria-label="Тил тандоо"
+            aria-label="Чат менюсу"
           >
-            {isOpen ? <X size={25} /> : <BotMessageSquare size={26} />}
+            {isOpen || activeMode ? (
+              <X size={25} />
+            ) : (
+              <BotMessageSquare size={26} />
+            )}
           </button>
         </div>
       </div>

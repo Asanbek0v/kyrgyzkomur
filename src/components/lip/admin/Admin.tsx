@@ -3,9 +3,6 @@
 import React, { useState, useEffect } from "react";
 import "./Admin.scss";
 
-const TEST_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhZG1pbjIiLCJlbWFpbCI6ImFkbWluMkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4Njk1MjM5MSwiZXhwIjoxNzg3MDM4NzkxfQ.5DCJa2WgV3H3CENEs1h529K5uzL1mOJIHfNxEemROFA";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ArticleItem {
@@ -117,7 +114,9 @@ export default function Admin() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          // TODO: заменить на реальный токен из аутентификации пользователя,
+          // а не захардкоженное значение
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
         body: JSON.stringify({
           title,
@@ -161,7 +160,6 @@ export default function Admin() {
     alert("Жаңылык ийгиликтүү кошулду!");
   };
 
-  // --- Колдонуучулар бөлүгү ---
   const [users, setUsers] = useState<UserItem[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
@@ -173,7 +171,7 @@ export default function Admin() {
     try {
       const res = await fetch(`${API_URL}/admin/panel`, {
         headers: {
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
       });
       const data = await res.json();
@@ -202,7 +200,7 @@ export default function Admin() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
         body: JSON.stringify({ role: newRole }),
       });
@@ -231,7 +229,7 @@ export default function Admin() {
       const res = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
       });
       const data = await res.json();
@@ -251,7 +249,6 @@ export default function Admin() {
     loadFromBackend();
   }, []);
 
-  // Колдонуучулар бетине өткөндө маалыматты жүктөө
   useEffect(() => {
     if (page === 1) {
       loadUsers();
