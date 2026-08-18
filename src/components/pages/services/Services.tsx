@@ -53,6 +53,7 @@ const Services: FC = () => {
         return;
       }
 
+      localStorage.setItem("token", result.token);
       if (data.rememberMe) {
         localStorage.setItem("token", result.token);
       } else {
@@ -64,7 +65,6 @@ const Services: FC = () => {
       localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
 
-      // TopBar'га токен өзгөргөнүн дароо кабарлайбыз
       window.dispatchEvent(new Event("authChange"));
 
       reset();

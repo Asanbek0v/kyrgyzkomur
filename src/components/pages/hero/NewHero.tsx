@@ -1,54 +1,109 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import "./NewHero.scss";
-import { useEffect } from "react";
-// import Image from "next/image";
+import Link from "next/link";
 
-const products = [
-  {
-    id: 1,
-    image:
-      "https://gubkin.city/upload/medialibrary/37a/1tbzgvij6kzw27gzhnrteqeinnyy5eyd/PK_220628_115947.jpg",
-    category: "ПРОИЗВОДСТВО",
-    name: "НА РАЗРЕЗЕ КАРА-КЕЧЕ УВЕЛИЧЕНЫ ОБЪЁМЫ ДОБЫЧИ",
-    date: "10 августа 2026",
-    desc: "С начала года добыто свыше 900 тыс. тонн угля — на 12% больше прошлогоднего показателя.",
-  },
-  {
-    id: 2,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVUQ930GO3bIeIhbePpfgDvVUC4ZDrtMDFmUKay3TebA&s=10",
-    category: "КАДРЫ",
-    name: "ОБУЧЕНИЕ ГОРНЯКОВ ПО ПРОГРАММЕ БЕЗОПАСНОСТИ ТРУДА",
-    date: "4 августа 2026",
-    desc: "Более 200 сотрудников прошли аттестацию и получили новое защитное снаряжение.",
-  },
-  {
-    id: 3,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLXmwtgdjiVEDmYwvt5rKbQoJKtx44y9lo9kVX-dz_pA&s=10",
-    category: "ОТГРУЗКА",
-    name: "НАЧАЛАСЬ ПОДГОТОВКА К ОТОПИТЕЛЬНОМУ СЕЗОНУ",
-    date: "28 июля 2026",
-    desc: "Формируются запасы угля для населения и социальных объектов во всех областях республики.",
-  },
-];
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+type NewsItem = {
+  id: number;
+  name: string;
+  category: string;
+  image: string;
+  date: string;
+  desc: string;
+};
 
 const NewHero = () => {
+  const [products, setProducts] = useState<NewsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     AOS.init({
       duration: 800,
       once: true,
       easing: "ease-in-out",
     });
-
-    const timer = setTimeout(() => {
-      AOS.refresh();
-    }, 500);
-
-    return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!API_URL) {
+      console.error("NEXT_PUBLIC_API_URL не найден (проверьте файл .env).");
+      setError("Адрес сервера не указан.");
+      setIsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const res = await fetch(`${API_URL}/products/get`, {
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error(`Сервер вернул ошибку: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        const mapped: NewsItem[] = data
+          .map((p: any) => ({
+            id: p.id,
+            name: p.title,
+            category: "НОВОСТИ",
+            image: p.image,
+            rawDate: p.date ? new Date(p.date) : null,
+            date: p.date
+              ? new Date(p.date).toLocaleDateString("ru-RU", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "",
+            desc: p.description,
+          }))
+          .sort((a: any, b: any) => {
+            if (!a.rawDate) return 1;
+            if (!b.rawDate) return -1;
+            return b.rawDate.getTime() - a.rawDate.getTime();
+          })
+          .slice(0, 6)
+          .map(({ rawDate, ...rest }: any) => rest);
+
+        setProducts(mapped);
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          console.error("Ошибка при загрузке новостей:", err);
+          setError("Произошла ошибка при загрузке новостей.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && products.length > 0) {
+      const timer = setTimeout(() => {
+        AOS.refresh();
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, products]);
 
   return (
     <section id="newHero">
@@ -58,56 +113,58 @@ const NewHero = () => {
             <h2>НОВОСТИ И ПРЕСС-ЦЕНТР</h2>
             <span></span>
           </div>
-
-          <a href="#">
+          <Link href={"/news"}>
             ВСЕ НОВОСТИ <span>→</span>
-          </a>
+          </Link>
         </div>
 
         <div className="newHero">
-          {products.map((item, index) => (
-            <article
-              className="newHero__card"
-              key={item.id}
-              data-aos="fade-up"
-              data-aos-delay={index * 150}
-            >
-              <div
-                className="newHero__image"
-                data-aos="zoom-in"
-                data-aos-delay={index * 150 + 100}
-              >
-                {/* <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  style={{ objectFit: "cover" }}
-                  onLoad={() => AOS.refresh()}
-                /> */}
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  onLoad={() => AOS.refresh()}
-                />
-                <span>{item.category}</span>
-              </div>
+          {isLoading && <p>Загрузка...</p>}
 
-              <div className="newHero__content">
-                <div className="newHero__date">
-                  <span>📅</span>
-                  {item.date}
+          {error && <p className="newHero__error">{error}</p>}
+
+          {!isLoading && !error && products.length === 0 && (
+            <p className="newHero__empty">Пока нет новостей</p>
+          )}
+
+          {!isLoading &&
+            !error &&
+            products.map((item, index) => (
+              <article
+                className="newHero__card"
+                key={item.id}
+                data-aos="fade-up"
+                data-aos-delay={index * 150}
+              >
+                <div
+                  className="newHero__image"
+                  data-aos="zoom-in"
+                  data-aos-delay={index * 150 + 100}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    onLoad={() => AOS.refresh()}
+                  />
+                  <span>{item.category}</span>
                 </div>
 
-                <h3>{item.name}</h3>
+                <div className="newHero__content">
+                  <div className="newHero__date">
+                    <span>📅</span>
+                    {item.date}
+                  </div>
 
-                <p>{item.desc}</p>
+                  <h3>{item.name}</h3>
 
-                <a href="#">
-                  ПОДРОБНЕЕ <span>→</span>
-                </a>
-              </div>
-            </article>
-          ))}
+                  <p>{item.desc}</p>
+
+                  <Link href={`/news/${item.id}`}>
+                    ПОДРОБНЕЕ <span>→</span>
+                  </Link>
+                </div>
+              </article>
+            ))}
         </div>
       </div>
     </section>
