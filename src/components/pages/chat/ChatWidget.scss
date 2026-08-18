@@ -76,7 +76,73 @@
       }
     }
 
-    // Тил тандоо панели
+    &--options {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 15px;
+      button {
+        width: 155px;
+        min-height: 48px;
+        background: #263449;
+        padding: 0 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease;
+        span {
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+        }
+        p {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+        &:hover {
+          transform: translateX(-4px);
+          background: #263449;
+        }
+      }
+      &_bot {
+        width: 155px;
+        min-height: 48px;
+        background: #263449;
+        padding: 0 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease;
+
+        p {
+          color: var(--text-primary);
+          white-space: nowrap;
+        }
+
+        &:hover {
+          transform: translateX(-4px);
+          background: #263449;
+        }
+      }
+    }
     &--language {
       width: 260px;
       margin-bottom: 16px;
@@ -192,7 +258,6 @@
       }
     }
 
-    // Панелдин жабуу баскычы (X)
     &--window_close {
       width: 32px;
       height: 32px;

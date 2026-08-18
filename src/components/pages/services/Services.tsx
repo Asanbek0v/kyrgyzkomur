@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface IServices {
   login: string;
@@ -52,17 +53,17 @@ const Services: FC = () => {
         return;
       }
 
-      // Токенди сактоо
-      if (data.rememberMe) {
-        localStorage.setItem("token", result.token);
-      } else {
-        sessionStorage.setItem("token", result.token);
-      }
+      // TopBar ар дайым localStorage'дан окуйт, ошондуктан токенди
+      // "эстеп калуу" тандалганбы же жокпу дегенге карабай
+      // ар дайым localStorage'га сактайбыз.
+      localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
+
+      // TopBar'га токен өзгөргөнүн дароо кабарлайбыз
+      window.dispatchEvent(new Event("authChange"));
 
       reset();
 
-      // Админ болсо админ панелге, болбосо башкы бетке
       if (result.user?.role === "ADMIN") {
         router.push("/admin");
       } else {
@@ -182,6 +183,21 @@ const Services: FC = () => {
                 <span>{isSubmitting ? "Вход..." : "Войти"}</span>
                 <LogIn size={18} />
               </button>
+
+              <p
+                className="Services--block__register"
+                data-aos="fade-up"
+                data-aos-duration="700"
+                data-aos-delay="600"
+              >
+                Аккаунтуңуз жокпу?{" "}
+                <Link
+                  href="/qr_login"
+                  className="Services--block__register-link"
+                >
+                  Регистрация
+                </Link>
+              </p>
             </form>
           </div>
         </div>
