@@ -69,7 +69,6 @@ const Vacancies: FC = () => {
 
   const toggleDept = (id: string) => {
     setOpenDeptId((prevId) => (prevId === id ? null : id));
-    // Аккордеон ачылып-жабылганда AOS скролл позицияларын кайра эсептейт
     setTimeout(() => {
       AOS.refresh();
     }, 350);

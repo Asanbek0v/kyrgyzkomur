@@ -13,7 +13,7 @@ type NewsItem = {
   category: string;
   image: string;
   date: string;
-  description: string;
+  desc: string;
 };
 
 const NewHero = () => {
@@ -54,12 +54,28 @@ const NewHero = () => {
           throw new Error(`Сервер ката кайтарды: ${res.status}`);
         }
 
-        const data: NewsItem[] = await res.json();
-        setProducts(data);
+        const data = await res.json();
+
+        const mapped: NewsItem[] = data.map((p: any) => ({
+          id: p.id,
+          name: p.title,
+          category: "НОВОСТИ",
+          image: p.image,
+          date: p.date
+            ? new Date(p.date).toLocaleDateString("ru-RU", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : "",
+          desc: p.description,
+        }));
+
+        setProducts(mapped);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
-          console.error("Fetch error:", err);
-          setError("Маалыматтарды жүктөөдө ката кетти.");
+          console.error("Жаңылыктарды жүктөөдө ката:", err);
+          setError("Жаңылыктарды жүктөөдө ката кетти.");
         }
       } finally {
         setIsLoading(false);
@@ -100,6 +116,10 @@ const NewHero = () => {
 
           {error && <p className="newHero__error">{error}</p>}
 
+          {!isLoading && !error && products.length === 0 && (
+            <p className="newHero__empty">Азырынча жаңылыктар жок</p>
+          )}
+
           {!isLoading &&
             !error &&
             products.map((item, index) => (
@@ -130,7 +150,7 @@ const NewHero = () => {
 
                   <h3>{item.name}</h3>
 
-                  <p>{item.description}</p>
+                  <p>{item.desc}</p>
 
                   <a href="#">
                     ПОДРОБНЕЕ <span>→</span>

@@ -262,6 +262,7 @@ export default function Admin() {
             {page === 0 ? "/ Жаңылык кошуу" : "/ Катталган колдонуучулар"}
           </span>
         </h1>
+
         <nav style={{ marginTop: "12px" }}>
           <button
             type="button"

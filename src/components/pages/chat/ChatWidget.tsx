@@ -7,8 +7,8 @@ import { useTranslatePage } from "@/src/api/useTranslate";
 import whatsApp from "@/src/assets/WhatsApp_Logo_green.svg.webp";
 import Image from "next/image";
 
-type Language = "ky" | "ru";
 type ChatMode = "translate" | null;
+type Language = "ky" | "ru" | null;
 
 const ChatWidget: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,13 +18,13 @@ const ChatWidget: FC = () => {
 
   const phone = "996704210706";
   const message = encodeURIComponent(
-    "Здравствуйте! Я хотел бы получить информацию об угле.",
+    "Здравствуйте! Я хотел бы получить  информацию об угле.",
   );
   const waUrl = `https://wa.me/${phone}?text=${message}`;
 
   const handleMainButton = () => {
     if (activeMode) {
-      handleClose();
+      setActiveMode(null);
       return;
     }
     setIsOpen((prev) => !prev);
@@ -32,9 +32,11 @@ const ChatWidget: FC = () => {
 
   const handleMode = (mode: ChatMode) => {
     setActiveMode(mode);
+    setIsOpen(false);
   };
 
   const handleLanguage = (lang: Language) => {
+    if (!lang) return;
     translatePage(lang);
     handleClose();
   };
@@ -77,20 +79,20 @@ const ChatWidget: FC = () => {
               <div className="ChatWidget--language_header">
                 <div>
                   <span>🌐</span>
-                  <h3>Переводчик сайта</h3>
+                  <h3>Переводчик сайтов</h3>
                 </div>
                 <button
                   type="button"
                   onClick={handleClose}
                   className="ChatWidget--window_close"
-                  aria-label="Жабуу"
+                  aria-label="Закрыть"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               <div className="ChatWidget--language_body">
-                <p>Сайтты кайсы тилге которобуз?</p>
+                <p>На какой язык нам следует перевести сайт?</p>
 
                 <button
                   type="button"
@@ -123,7 +125,7 @@ const ChatWidget: FC = () => {
             type="button"
             className={`ChatWidget--main ${isOpen || activeMode ? "active" : ""}`}
             onClick={handleMainButton}
-            aria-label="Чат менюсу"
+            aria-label="Chat"
           >
             {isOpen || activeMode ? (
               <X size={25} />
