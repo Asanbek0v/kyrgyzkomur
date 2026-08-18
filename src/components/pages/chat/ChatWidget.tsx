@@ -4,8 +4,10 @@ import { FC, useState } from "react";
 import { BotMessageSquare, X } from "lucide-react";
 import "./ChatWidget.scss";
 import { useTranslatePage } from "@/src/api/useTranslate";
+import whatsApp from "@/src/assets/WhatsApp_Logo_green.svg.webp";
+import Image from "next/image";
 
-type ChatMode = "bot" | "translate" | null;
+type ChatMode = "translate" | null;
 type Language = "ky" | "ru" | null;
 
 const ChatWidget: FC = () => {
@@ -13,6 +15,12 @@ const ChatWidget: FC = () => {
   const [activeMode, setActiveMode] = useState<ChatMode>(null);
 
   const { mutate: translatePage } = useTranslatePage();
+
+  const phone = "996704210706";
+  const message = encodeURIComponent(
+    "Здравствуйте! Я хотел бы получить информацию об угле.",
+  );
+  const waUrl = `https://wa.me/${phone}?text=${message}`;
 
   const handleMainButton = () => {
     if (activeMode) {
@@ -29,9 +37,7 @@ const ChatWidget: FC = () => {
 
   const handleLanguage = (lang: Language) => {
     if (!lang) return;
-
     translatePage(lang);
-
     handleClose();
   };
 
@@ -55,14 +61,16 @@ const ChatWidget: FC = () => {
                 <p>Переводчик</p>
               </button>
 
-              <button
-                type="button"
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="ChatWidget--options_bot"
-                onClick={() => handleMode("bot")}
+                onClick={handleClose}
               >
-                <span>🤖</span>
-                <p>Бот</p>
-              </button>
+                <Image src={whatsApp} alt="logo" width={20} height={20} />
+                <p>WhatsApp</p>
+              </a>
             </div>
           )}
 
@@ -109,36 +117,6 @@ const ChatWidget: FC = () => {
                     <small>Russian</small>
                   </div>
                 </button>
-              </div>
-            </div>
-          )}
-
-          {activeMode === "bot" && (
-            <div className="ChatWidget--window">
-              <div className="ChatWidget--window_header">
-                <div className="ChatWidget--window_header-title">
-                  <span>🤖</span>
-                  <h3>Авто-жоопчу Бот</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="ChatWidget--window_close"
-                  aria-label="Жабуу"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="ChatWidget--window_body">
-                <div className="ChatWidget--message bot">
-                  Саламатсызбы! Кыргыз Көмүр боюнча сурооңузду бериңиз.
-                </div>
-              </div>
-
-              <div className="ChatWidget--window_footer">
-                <input type="text" placeholder="Сурооңузду жазыңыз..." />
-                <button type="button">➜</button>
               </div>
             </div>
           )}

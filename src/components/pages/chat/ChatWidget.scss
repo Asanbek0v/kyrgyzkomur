@@ -73,9 +73,7 @@
       button {
         width: 155px;
         min-height: 48px;
-        // background: var(--card-bg);
         background: #263449;
-
         padding: 0 15px;
         border: 1px solid var(--border-color);
         border-radius: 14px;
@@ -107,10 +105,29 @@
         }
       }
       &_bot {
-        background: var(--text-primary);
+        width: 155px;
+        min-height: 48px;
+        background: #263449;
+        padding: 0 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease;
+
+        p {
+          color: var(--text-primary);
+          white-space: nowrap;
+        }
+
         &:hover {
-          background: var(--text-primary);
-          border-color: rgba(255, 255, 255, 0.15);
+          transform: translateX(-4px);
+          background: #263449;
         }
       }
     }
