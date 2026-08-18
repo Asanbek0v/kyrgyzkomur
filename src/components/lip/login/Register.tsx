@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Lock, User, Mail, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import Admin from "../admin/Admin";
+import Link from "next/link";
 
 interface IRegister {
   username: string;
@@ -61,15 +61,19 @@ const Register = () => {
         return;
       }
 
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+        // TopBar (жана башка компоненттер) угуп, атын дароо жаңыртышы үчүн
+        window.dispatchEvent(new Event("authChange"));
+      }
+
       reset();
-      router.push("/login");
+      router.push("/");
     } catch (err) {
       console.error("Register ката:", err);
       setRegisterError("Backend менен байланышта ката чыкты");
     }
   };
-
-
 
   return (
     <section id="register">
@@ -203,6 +207,18 @@ const Register = () => {
                 </span>
                 <UserPlus size={18} />
               </button>
+
+              <p
+                className="Services--block__register"
+                data-aos="fade-up"
+                data-aos-duration="700"
+                data-aos-delay="700"
+              >
+                Аккаунтуңуз барбы?{" "}
+                <Link href="/login" className="Services--block__register-link">
+                  Войти
+                </Link>
+              </p>
             </form>
           </div>
         </div>

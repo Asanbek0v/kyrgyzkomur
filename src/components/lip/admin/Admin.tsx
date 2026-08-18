@@ -114,8 +114,6 @@ export default function Admin() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // TODO: заменить на реальный токен из аутентификации пользователя,
-          // а не захардкоженное значение
           Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
         body: JSON.stringify({
