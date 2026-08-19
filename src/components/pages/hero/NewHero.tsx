@@ -17,7 +17,6 @@ type NewsItem = {
   desc: string;
 };
 
-// Датаны форматтоочу жөнөкөй функция
 const formatDate = (dateString?: string) => {
   if (!dateString) return "";
   return new Date(dateString).toLocaleDateString("ru-RU", {
@@ -32,7 +31,6 @@ const NewHero = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. AOS анимациясын инициализациялоо
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -95,7 +93,6 @@ const NewHero = () => {
     return () => controller.abort();
   }, []);
 
-  // 3. Маалыматтар жүктөлүп бүткөндө AOS'ту жаңылоо
   useEffect(() => {
     if (!isLoading && products.length > 0) {
       AOS.refresh();

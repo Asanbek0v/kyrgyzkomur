@@ -129,7 +129,7 @@ const Detail: FC = () => {
               </div>
             </>
           )}
-          <NewHero/>
+          <NewHero />
         </div>
       </div>
     </section>
