@@ -17,6 +17,15 @@ type NewsItem = {
   desc: string;
 };
 
+const formatDate = (dateString?: string) => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
 const NewHero = () => {
   const [products, setProducts] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +41,6 @@ const NewHero = () => {
 
   useEffect(() => {
     if (!API_URL) {
-      console.error("NEXT_PUBLIC_API_URL не найден (проверьте файл .env).");
       setError("Адрес сервера не указан.");
       setIsLoading(false);
       return;
@@ -49,40 +57,30 @@ const NewHero = () => {
           signal: controller.signal,
         });
 
-        if (!res.ok) {
-          throw new Error(`Сервер вернул ошибку: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Сервер вернул ошибку: ${res.status}`);
 
         const data = await res.json();
 
-        const mapped: NewsItem[] = data
-          .map((p: any) => ({
-            id: p.id,
-            name: p.title,
-            category: "НОВОСТИ",
-            image: p.image,
-            rawDate: p.date ? new Date(p.date) : null,
-            date: p.date
-              ? new Date(p.date).toLocaleDateString("ru-RU", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })
-              : "",
-            desc: p.description,
-          }))
+        const sortedData = data
           .sort((a: any, b: any) => {
-            if (!a.rawDate) return 1;
-            if (!b.rawDate) return -1;
-            return b.rawDate.getTime() - a.rawDate.getTime();
+            return (
+              new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+            );
           })
-          .slice(0, 6)
-          .map(({ rawDate, ...rest }: any) => rest);
+          .slice(0, 6);
 
-        setProducts(mapped);
+        const formattedProducts: NewsItem[] = sortedData.map((el: any) => ({
+          id: el.id,
+          name: el.title,
+          category: "НОВОСТИ",
+          image: el.image,
+          date: formatDate(el.date),
+          desc: el.description,
+        }));
+
+        setProducts(formattedProducts);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
-          console.error("Ошибка при загрузке новостей:", err);
           setError("Произошла ошибка при загрузке новостей.");
         }
       } finally {
@@ -97,11 +95,7 @@ const NewHero = () => {
 
   useEffect(() => {
     if (!isLoading && products.length > 0) {
-      const timer = setTimeout(() => {
-        AOS.refresh();
-      }, 500);
-
-      return () => clearTimeout(timer);
+      AOS.refresh();
     }
   }, [isLoading, products]);
 
@@ -113,7 +107,7 @@ const NewHero = () => {
             <h2>НОВОСТИ И ПРЕСС-ЦЕНТР</h2>
             <span></span>
           </div>
-          <Link href={"/news"}>
+          <Link href="/news">
             ВСЕ НОВОСТИ <span>→</span>
           </Link>
         </div>
@@ -136,16 +130,8 @@ const NewHero = () => {
                 data-aos="fade-up"
                 data-aos-delay={index * 150}
               >
-                <div
-                  className="newHero__image"
-                  data-aos="zoom-in"
-                  data-aos-delay={index * 150 + 100}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    onLoad={() => AOS.refresh()}
-                  />
+                <div className="newHero__image">
+                  <img src={item.image} alt={item.name} />
                   <span>{item.category}</span>
                 </div>
 
@@ -156,7 +142,6 @@ const NewHero = () => {
                   </div>
 
                   <h3>{item.name}</h3>
-
                   <p>{item.desc}</p>
 
                   <Link href={`/news/${item.id}`}>
