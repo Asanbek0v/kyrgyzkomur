@@ -41,6 +41,9 @@ const NewHero = () => {
 
   useEffect(() => {
     if (!API_URL) {
+      console.error(
+        "NEXT_PUBLIC_API_URL табылган жок (.env файлын текшериңиз).",
+      );
       setError("Адрес сервера не указан.");
       setIsLoading(false);
       return;
@@ -107,6 +110,7 @@ const NewHero = () => {
             <h2>НОВОСТИ И ПРЕСС-ЦЕНТР</h2>
             <span></span>
           </div>
+
           <Link href="/news">
             ВСЕ НОВОСТИ <span>→</span>
           </Link>

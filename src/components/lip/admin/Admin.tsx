@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import "./Admin.scss";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 interface ArticleItem {
   id: number;
   title: string;
