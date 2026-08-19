@@ -4,6 +4,7 @@ import { FC, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import "./Detail.scss";
+import NewHero from "../hero/NewHero";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -128,6 +129,7 @@ const Detail: FC = () => {
               </div>
             </>
           )}
+          <NewHero/>
         </div>
       </div>
     </section>

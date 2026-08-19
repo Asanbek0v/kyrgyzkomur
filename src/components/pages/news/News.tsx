@@ -1,6 +1,7 @@
 "use client";
 import { FC, useEffect, useState } from "react";
 import "./News.scss";
+import Link from "next/link";
 
 interface Product {
   id: number;
@@ -64,7 +65,9 @@ const News: FC = () => {
             products.map((item) => (
               <div key={item.id} className="news-card">
                 <div className="news-card__image">
-                  <img src={item.image} alt={item.title} />
+                  <Link href={`/news/${item.id}`}>
+                    <img src={item.image} alt={item.title} />
+                  </Link>
                 </div>
 
                 <div className="news-card__body">
