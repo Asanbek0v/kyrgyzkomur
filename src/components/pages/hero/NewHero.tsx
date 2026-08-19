@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import "./NewHero.scss";
+import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,6 +15,15 @@ type NewsItem = {
   image: string;
   date: string;
   desc: string;
+};
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 };
 
 const NewHero = () => {
@@ -34,7 +44,7 @@ const NewHero = () => {
       console.error(
         "NEXT_PUBLIC_API_URL табылган жок (.env файлын текшериңиз).",
       );
-      setError("Сервер дареги көрсөтүлгөн эмес.");
+      setError("Адрес сервера не указан.");
       setIsLoading(false);
       return;
     }
@@ -50,32 +60,31 @@ const NewHero = () => {
           signal: controller.signal,
         });
 
-        if (!res.ok) {
-          throw new Error(`Сервер ката кайтарды: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Сервер вернул ошибку: ${res.status}`);
 
         const data = await res.json();
 
-        const mapped: NewsItem[] = data.map((p: any) => ({
-          id: p.id,
-          name: p.title,
+        const sortedData = data
+          .sort((a: any, b: any) => {
+            return (
+              new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+            );
+          })
+          .slice(0, 6);
+
+        const formattedProducts: NewsItem[] = sortedData.map((el: any) => ({
+          id: el.id,
+          name: el.title,
           category: "НОВОСТИ",
-          image: p.image,
-          date: p.date
-            ? new Date(p.date).toLocaleDateString("ru-RU", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            : "",
-          desc: p.description,
+          image: el.image,
+          date: formatDate(el.date),
+          desc: el.description,
         }));
 
-        setProducts(mapped);
+        setProducts(formattedProducts);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
-          console.error("Жаңылыктарды жүктөөдө ката:", err);
-          setError("Жаңылыктарды жүктөөдө ката кетти.");
+          setError("Произошла ошибка при загрузке новостей.");
         }
       } finally {
         setIsLoading(false);
@@ -89,11 +98,7 @@ const NewHero = () => {
 
   useEffect(() => {
     if (!isLoading && products.length > 0) {
-      const timer = setTimeout(() => {
-        AOS.refresh();
-      }, 500);
-
-      return () => clearTimeout(timer);
+      AOS.refresh();
     }
   }, [isLoading, products]);
 
@@ -106,9 +111,9 @@ const NewHero = () => {
             <span></span>
           </div>
 
-          <a href="#">
+          <Link href="/news">
             ВСЕ НОВОСТИ <span>→</span>
-          </a>
+          </Link>
         </div>
 
         <div className="newHero">
@@ -129,16 +134,8 @@ const NewHero = () => {
                 data-aos="fade-up"
                 data-aos-delay={index * 150}
               >
-                <div
-                  className="newHero__image"
-                  data-aos="zoom-in"
-                  data-aos-delay={index * 150 + 100}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    onLoad={() => AOS.refresh()}
-                  />
+                <div className="newHero__image">
+                  <img src={item.image} alt={item.name} />
                   <span>{item.category}</span>
                 </div>
 
@@ -149,12 +146,11 @@ const NewHero = () => {
                   </div>
 
                   <h3>{item.name}</h3>
-
                   <p>{item.desc}</p>
 
-                  <a href="#">
+                  <Link href={`/news/${item.id}`}>
                     ПОДРОБНЕЕ <span>→</span>
-                  </a>
+                  </Link>
                 </div>
               </article>
             ))}
