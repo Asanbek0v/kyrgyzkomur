@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import "./Admin.scss";
+import AddVacanceis from "../addVacancies/AddVacanceis";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 interface ArticleItem {
   id: number;
@@ -21,6 +22,15 @@ interface UserItem {
   email: string;
   role: string;
   createdAt: string;
+}
+
+interface VacancyItem {
+  id: number;
+  title: string;
+  description: string;
+  requirements?: string;
+  salary?: string;
+  date: string;
 }
 
 export default function Admin() {
@@ -241,6 +251,120 @@ export default function Admin() {
     }
   };
 
+  // ==== Вакансия кошуу (page === 2) ====
+  const [vacTitle, setVacTitle] = useState("");
+  const [vacDescription, setVacDescription] = useState("");
+  const [vacRequirements, setVacRequirements] = useState("");
+  const [vacSalary, setVacSalary] = useState("");
+  const [vacDate, setVacDate] = useState(
+    () => new Date().toISOString().split("T")[0],
+  );
+
+  const [vacancies, setVacancies] = useState<VacancyItem[]>([]);
+  const [vacanciesLoading, setVacanciesLoading] = useState(false);
+
+  const loadVacancies = async () => {
+    setVacanciesLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/vacancies/get`);
+      const data = await res.json();
+      const mapped: VacancyItem[] = (Array.isArray(data) ? data : []).map(
+        (v: any) => ({
+          id: v.id,
+          title: v.title,
+          description: v.description,
+          requirements: v.requirements || "",
+          salary: v.salary || "",
+          date: v.date
+            ? new Date(v.date).toLocaleDateString("ru-RU")
+            : new Date().toLocaleDateString("ru-RU"),
+        }),
+      );
+      setVacancies(mapped);
+    } catch (err) {
+      console.error("Вакансияларды жүктөөдө ката:", err);
+    } finally {
+      setVacanciesLoading(false);
+    }
+  };
+
+  const handleVacancySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!vacTitle || !vacDescription) {
+      alert("Сураныч, вакансиянын аталышын жана сүрөттөмөсүн толтуруңуз!");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/vacancies/post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+        },
+        body: JSON.stringify({
+          title: vacTitle,
+          description: vacDescription,
+          requirements: vacRequirements,
+          salary: vacSalary,
+          date: vacDate
+            ? new Date(vacDate).toISOString()
+            : new Date().toISOString(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Backend'ге сактоодо ката чыкты");
+        return;
+      }
+
+      const newVacancy: VacancyItem = {
+        id: data.id || Date.now(),
+        title: vacTitle,
+        description: vacDescription,
+        requirements: vacRequirements,
+        salary: vacSalary,
+        date: new Date().toLocaleDateString("ru-RU"),
+      };
+      setVacancies([newVacancy, ...vacancies]);
+    } catch (err) {
+      console.error("Вакансияны жиберүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+      return;
+    }
+
+    setVacTitle("");
+    setVacDescription("");
+    setVacRequirements("");
+    setVacSalary("");
+    setVacDate(today);
+    alert("Вакансия ийгиликтүү кошулду!");
+  };
+
+  const handleDeleteVacancy = async (vacancyId: number) => {
+    if (!confirm("Бул вакансияны өчүргүңүз келеби?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/vacancies/${vacancyId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Ката чыкты");
+        return;
+      }
+      alert("Вакансия өчүрүлдү!");
+      loadVacancies();
+    } catch (err) {
+      console.error("Вакансияны өчүрүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+    }
+  };
+
   useEffect(() => {
     loadFromBackend();
   }, []);
@@ -248,6 +372,9 @@ export default function Admin() {
   useEffect(() => {
     if (page === 1) {
       loadUsers();
+    }
+    if (page === 2) {
+      loadVacancies();
     }
   }, [page]);
 
@@ -257,7 +384,11 @@ export default function Admin() {
         <h1>
           Панель управления{" "}
           <span>
-            {page === 0 ? "/ Жаңылык кошуу" : "/ Катталган колдонуучулар"}
+            {page === 0
+              ? "/ Жаңылык кошуу"
+              : page === 1
+                ? "/ Катталган колдонуучулар"
+                : "/ Вакансия кошуу"}
           </span>
         </h1>
 
@@ -283,6 +414,7 @@ export default function Admin() {
             type="button"
             onClick={() => setPage(1)}
             style={{
+              marginRight: "16px",
               fontWeight: 600,
               background: "none",
               border: "none",
@@ -294,6 +426,22 @@ export default function Admin() {
             }}
           >
             Колдонуучулар
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage(2)}
+            style={{
+              fontWeight: 600,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: page === 2 ? "#2563eb" : "#475569",
+              textDecoration: page === 2 ? "underline" : "none",
+              fontSize: "14px",
+              padding: 0,
+            }}
+          >
+            Вакансия кошуу
           </button>
         </nav>
       </div>
@@ -523,7 +671,7 @@ export default function Admin() {
             )}
           </div>
         </div>
-      ) : (
+      ) : page === 1 ? (
         <div style={{ marginTop: "20px" }}>
           {usersLoading && <p>Жүктөлүп жатат...</p>}
           {usersError && <p style={{ color: "red" }}>{usersError}</p>}
@@ -652,6 +800,10 @@ export default function Admin() {
             </table>
           )}
         </div>
+      ) : (
+        <>
+          <AddVacanceis />
+        </>
       )}
     </div>
   );
