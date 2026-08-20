@@ -1,24 +1,106 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import "./NewHero.scss";
+import Link from "next/link";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+type NewsItem = {
+  id: number;
+  name: string;
+  category: string;
+  image: string;
+  date: string;
+  desc: string;
+};
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const NewHero = () => {
+  const [products, setProducts] = useState<NewsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     AOS.init({
       duration: 800,
       once: true,
       easing: "ease-in-out",
     });
-
-    const timer = setTimeout(() => {
-      AOS.refresh();
-    }, 500);
-
-    return () => clearTimeout(timer);
-
-  }, [products]);
-
   }, []);
 
+  useEffect(() => {
+    if (!API_URL) {
+      console.error(
+        "NEXT_PUBLIC_API_URL табылган жок (.env файлын текшериңиз).",
+      );
+      setError("Адрес сервера не указан.");
+      setIsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const res = await fetch(`${API_URL}/products/get`, {
+          signal: controller.signal,
+        });
+
+        if (!res.ok) throw new Error(`Сервер вернул ошибку: ${res.status}`);
+
+        const data = await res.json();
+
+        const sortedData = data
+          .sort((a: any, b: any) => {
+            return (
+              new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+            );
+          })
+          .slice(0, 6);
+
+        const formattedProducts: NewsItem[] = sortedData.map((p: any) => ({
+          id: p.id,
+          name: p.title,
+          category: "НОВОСТИ",
+          image: p.image,
+          date: formatDate(p.date),
+          desc: p.description,
+        }));
+
+        setProducts(formattedProducts);
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          setError("Произошла ошибка при загрузке новостей.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && products.length > 0) {
+      AOS.refresh();
+    }
+  }, [isLoading, products]);
 
   return (
     <section id="newHero">
@@ -29,64 +111,49 @@ import "./NewHero.scss";
             <span></span>
           </div>
 
-          <a href="#">
+          <Link href="/news">
             ВСЕ НОВОСТИ <span>→</span>
-          </a>
+          </Link>
         </div>
 
-
-        <div className="newHero" >
-
         <div className="newHero">
+          {isLoading && <p>Загрузка...</p>}
 
-          {products.map((item, index) => (
-            <article
-              className="newHero__card"
-              key={item.id}
-              data-aos="fade-up"
-              data-aos-delay={index * 150}
-            >
+          {error && <p className="newHero__error">{error}</p>}
 
-              <div
-                className="newHero__image"
-                data-aos="zoom-in"
-                data-aos-delay={index * 150 + 100}
+          {!isLoading && !error && products.length === 0 && (
+            <p className="newHero__empty">Пока нет новостей</p>
+          )}
+
+          {!isLoading &&
+            !error &&
+            products.map((item, index) => (
+              <article
+                className="newHero__card"
+                key={item.id}
+                data-aos="fade-up"
+                data-aos-delay={index * 150}
               >
-                <img
-                  src={item.image}
-
-                  alt={item.title}
-                  onLoad={() => AOS.refresh()} 
-                />
-                <span>НОВОСТИ</span>
-
-                  alt={item.name}
-                  onLoad={() => AOS.refresh()} // Сүрөт жүктөлөрү менен анимацияны жаңыртуу
-                />
-                <span>{item.category}</span>
-
-              </div>
-
-              <div className="newHero__content">
-                <div className="newHero__date">
-                  <span>📅</span>
-
-                  {new Date(item.date).toLocaleDateString("ru-RU")}
-
-                  {item.date}
-
+                <div className="newHero__image">
+                  <img src={item.image} alt={item.name} />
+                  <span>{item.category}</span>
                 </div>
 
-                <h3>{item.title}</h3>
+                <div className="newHero__content">
+                  <div className="newHero__date">
+                    <span>📅</span>
+                    {item.date}
+                  </div>
 
-                <p>{item.description}</p>
+                  <h3>{item.name}</h3>
+                  <p>{item.desc}</p>
 
-                <a href="#">
-                  ПОДРОБНЕЕ <span>→</span>
-                </a>
-              </div>
-            </article>
-          ))}
+                  <Link href={`/news/${item.id}`}>
+                    ПОДРОБНЕЕ <span>→</span>
+                  </Link>
+                </div>
+              </article>
+            ))}
         </div>
       </div>
     </section>

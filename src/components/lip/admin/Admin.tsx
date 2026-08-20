@@ -2,12 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import "./Admin.scss";
-
-const TEST_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhZG1pbjIiLCJlbWFpbCI6ImFkbWluMkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4Njk1MjM5MSwiZXhwIjoxNzg3MDM4NzkxfQ.5DCJa2WgV3H3CENEs1h529K5uzL1mOJIHfNxEemROFA";
-
+import AddVacanceis from "../addVacancies/AddVacanceis";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 interface ArticleItem {
   id: number;
   title: string;
@@ -28,10 +24,18 @@ interface UserItem {
   createdAt: string;
 }
 
+interface VacancyItem {
+  id: number;
+  title: string;
+  description: string;
+  requirements?: string;
+  salary?: string;
+  date: string;
+}
+
 export default function Admin() {
   const [page, setPage] = useState(0);
 
-  // --- Жаңылык кошуу бөлүгү ---
   const [articles, setArticles] = useState<ArticleItem[]>([]);
 
   const [title, setTitle] = useState("");
@@ -118,7 +122,7 @@ export default function Admin() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
         body: JSON.stringify({
           title,
@@ -162,10 +166,10 @@ export default function Admin() {
     alert("Жаңылык ийгиликтүү кошулду!");
   };
 
-  // --- Колдонуучулар бөлүгү ---
   const [users, setUsers] = useState<UserItem[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
+  const [hoveredUserId, setHoveredUserId] = useState<number | null>(null);
 
   const loadUsers = async () => {
     setUsersLoading(true);
@@ -173,7 +177,7 @@ export default function Admin() {
     try {
       const res = await fetch(`${API_URL}/admin/panel`, {
         headers: {
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
       });
       const data = await res.json();
@@ -202,7 +206,7 @@ export default function Admin() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TEST_TOKEN}`,
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
         },
         body: JSON.stringify({ role: newRole }),
       });
@@ -219,14 +223,158 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteUser = async (userId: number) => {
+    if (
+      !confirm(
+        "Бул колдонуучуну өчүргүңүз келеби? Бул аракетти кайтарууга болбойт!",
+      )
+    )
+      return;
+
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Ката чыкты");
+        return;
+      }
+      alert("Колдонуучу өчүрүлдү!");
+      loadUsers();
+    } catch (err) {
+      console.error("Колдонуучуну өчүрүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+    }
+  };
+
+  // ==== Вакансия кошуу (page === 2) ====
+  const [vacTitle, setVacTitle] = useState("");
+  const [vacDescription, setVacDescription] = useState("");
+  const [vacRequirements, setVacRequirements] = useState("");
+  const [vacSalary, setVacSalary] = useState("");
+  const [vacDate, setVacDate] = useState(
+    () => new Date().toISOString().split("T")[0],
+  );
+
+  const [vacancies, setVacancies] = useState<VacancyItem[]>([]);
+  const [vacanciesLoading, setVacanciesLoading] = useState(false);
+
+  const loadVacancies = async () => {
+    setVacanciesLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/vacancies/get`);
+      const data = await res.json();
+      const mapped: VacancyItem[] = (Array.isArray(data) ? data : []).map(
+        (v: any) => ({
+          id: v.id,
+          title: v.title,
+          description: v.description,
+          requirements: v.requirements || "",
+          salary: v.salary || "",
+          date: v.date
+            ? new Date(v.date).toLocaleDateString("ru-RU")
+            : new Date().toLocaleDateString("ru-RU"),
+        }),
+      );
+      setVacancies(mapped);
+    } catch (err) {
+      console.error("Вакансияларды жүктөөдө ката:", err);
+    } finally {
+      setVacanciesLoading(false);
+    }
+  };
+
+  const handleVacancySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!vacTitle || !vacDescription) {
+      alert("Сураныч, вакансиянын аталышын жана сүрөттөмөсүн толтуруңуз!");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/vacancies/post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+        },
+        body: JSON.stringify({
+          title: vacTitle,
+          description: vacDescription,
+          requirements: vacRequirements,
+          salary: vacSalary,
+          date: vacDate
+            ? new Date(vacDate).toISOString()
+            : new Date().toISOString(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Backend'ге сактоодо ката чыкты");
+        return;
+      }
+
+      const newVacancy: VacancyItem = {
+        id: data.id || Date.now(),
+        title: vacTitle,
+        description: vacDescription,
+        requirements: vacRequirements,
+        salary: vacSalary,
+        date: new Date().toLocaleDateString("ru-RU"),
+      };
+      setVacancies([newVacancy, ...vacancies]);
+    } catch (err) {
+      console.error("Вакансияны жиберүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+      return;
+    }
+
+    setVacTitle("");
+    setVacDescription("");
+    setVacRequirements("");
+    setVacSalary("");
+    setVacDate(today);
+    alert("Вакансия ийгиликтүү кошулду!");
+  };
+
+  const handleDeleteVacancy = async (vacancyId: number) => {
+    if (!confirm("Бул вакансияны өчүргүңүз келеби?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/vacancies/${vacancyId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Ката чыкты");
+        return;
+      }
+      alert("Вакансия өчүрүлдү!");
+      loadVacancies();
+    } catch (err) {
+      console.error("Вакансияны өчүрүүдө ката:", err);
+      alert("Backend менен байланышта ката чыкты");
+    }
+  };
+
   useEffect(() => {
     loadFromBackend();
   }, []);
 
-  // Колдонуучулар бетине өткөндө маалыматты жүктөө
   useEffect(() => {
     if (page === 1) {
       loadUsers();
+    }
+    if (page === 2) {
+      loadVacancies();
     }
   }, [page]);
 
@@ -236,9 +384,14 @@ export default function Admin() {
         <h1>
           Панель управления{" "}
           <span>
-            {page === 0 ? "/ Жаңылык кошуу" : "/ Катталган колдонуучулар"}
+            {page === 0
+              ? "/ Жаңылык кошуу"
+              : page === 1
+                ? "/ Катталган колдонуучулар"
+                : "/ Вакансия кошуу"}
           </span>
         </h1>
+
         <nav style={{ marginTop: "12px" }}>
           <button
             type="button"
@@ -261,6 +414,7 @@ export default function Admin() {
             type="button"
             onClick={() => setPage(1)}
             style={{
+              marginRight: "16px",
               fontWeight: 600,
               background: "none",
               border: "none",
@@ -272,6 +426,22 @@ export default function Admin() {
             }}
           >
             Колдонуучулар
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage(2)}
+            style={{
+              fontWeight: 600,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: page === 2 ? "#2563eb" : "#475569",
+              textDecoration: page === 2 ? "underline" : "none",
+              fontSize: "14px",
+              padding: 0,
+            }}
+          >
+            Вакансия кошуу
           </button>
         </nav>
       </div>
@@ -501,7 +671,7 @@ export default function Admin() {
             )}
           </div>
         </div>
-      ) : (
+      ) : page === 1 ? (
         <div style={{ marginTop: "20px" }}>
           {usersLoading && <p>Жүктөлүп жатат...</p>}
           {usersError && <p style={{ color: "red" }}>{usersError}</p>}
@@ -530,13 +700,14 @@ export default function Admin() {
                   <th style={{ padding: "12px" }}>Ролу</th>
                   <th style={{ padding: "12px" }}>Катталган күнү</th>
                   <th style={{ padding: "12px" }}>Аракет</th>
+                  <th style={{ padding: "12px", width: "40px" }}></th>
                 </tr>
               </thead>
               <tbody>
                 {users.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       style={{ padding: "16px", color: "#94a3b8" }}
                     >
                       Колдонуучулар табылган жок
@@ -544,7 +715,12 @@ export default function Admin() {
                   </tr>
                 )}
                 {users.map((u) => (
-                  <tr key={u.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <tr
+                    key={u.id}
+                    onMouseEnter={() => setHoveredUserId(u.id)}
+                    onMouseLeave={() => setHoveredUserId(null)}
+                    style={{ borderBottom: "1px solid #f1f5f9" }}
+                  >
                     <td style={{ padding: "12px" }}>{u.id}</td>
                     <td style={{ padding: "12px" }}>{u.username}</td>
                     <td style={{ padding: "12px" }}>{u.email}</td>
@@ -589,12 +765,45 @@ export default function Admin() {
                         </button>
                       )}
                     </td>
+                    <td
+                      style={{
+                        padding: "12px",
+                        textAlign: "center",
+                        width: "40px",
+                      }}
+                    >
+                      {hoveredUserId === u.id && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteUser(u.id)}
+                          title="Колдонуучуну өчүрүү"
+                          style={{
+                            background: "#fee2e2",
+                            color: "#dc2626",
+                            border: "none",
+                            width: "26px",
+                            height: "26px",
+                            borderRadius: "50%",
+                            fontSize: "14px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            lineHeight: 1,
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
         </div>
+      ) : (
+        <>
+          <AddVacanceis />
+        </>
       )}
     </div>
   );
