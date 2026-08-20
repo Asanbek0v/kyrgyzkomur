@@ -72,13 +72,13 @@ const NewHero = () => {
           })
           .slice(0, 6);
 
-        const formattedProducts: NewsItem[] = sortedData.map((el: any) => ({
-          id: el.id,
-          name: el.title,
+        const formattedProducts: NewsItem[] = sortedData.map((p: any) => ({
+          id: p.id,
+          name: p.title,
           category: "НОВОСТИ",
-          image: el.image,
-          date: formatDate(el.date),
-          desc: el.description,
+          image: p.image,
+          date: formatDate(p.date),
+          desc: p.description,
         }));
 
         setProducts(formattedProducts);
@@ -117,12 +117,12 @@ const NewHero = () => {
         </div>
 
         <div className="newHero">
-          {isLoading && <p>Жүктөлүүдө...</p>}
+          {isLoading && <p>Загрузка...</p>}
 
           {error && <p className="newHero__error">{error}</p>}
 
           {!isLoading && !error && products.length === 0 && (
-            <p className="newHero__empty">Азырынча жаңылыктар жок</p>
+            <p className="newHero__empty">Пока нет новостей</p>
           )}
 
           {!isLoading &&

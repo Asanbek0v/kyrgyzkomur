@@ -9,23 +9,31 @@ interface Vacancy {
   description?: string;
   requirements?: string;
   salary?: string;
+  department: string;
   image?: string;
   date?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const DEPARTMENTS = [
+  { id: "central", title: "ЦЕНТРАЛЬНЫЙ АППАРАТ" },
+  { id: "kara-keche", title: 'Филиал "КАРА-КЕЧЕ"' },
+  { id: "issyk-kul", title: 'Филиал "ИССЫК-КУЛЬСКОЕ ПАРОХОДСТВО"' },
+  { id: "yuzhnyi", title: 'Филиал "ЮЖНЫЙ"' },
+];
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const VACANCIES_URL = `${API_URL}/vacancy`;
 
 const AddVacanceis = () => {
   const today = new Date().toLocaleDateString("sv-SE");
-console.log("API_URL", API_URL);
 
   const [vacTitle, setVacTitle] = useState("");
   const [vacDescription, setVacDescription] = useState("");
   const [vacRequirements, setVacRequirements] = useState("");
   const [vacSalary, setVacSalary] = useState("");
+  const [vacDepartment, setVacDepartment] = useState(DEPARTMENTS[0].id);
   const [vacDate, setVacDate] = useState(today);
 
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
@@ -71,6 +79,7 @@ console.log("API_URL", API_URL);
           description: cleanText(vacDescription),
           requirements: cleanText(vacRequirements),
           salary: cleanText(vacSalary),
+          department: vacDepartment,
           date: vacDate ? new Date(vacDate).toISOString() : null,
           createdAt: new Date().toISOString(),
         }),
@@ -85,6 +94,7 @@ console.log("API_URL", API_URL);
         setVacDescription("");
         setVacRequirements("");
         setVacSalary("");
+        setVacDepartment(DEPARTMENTS[0].id);
         setVacDate(today);
       } else {
         const errorData = await response.json();
@@ -114,6 +124,9 @@ console.log("API_URL", API_URL);
     }
   };
 
+  const departmentTitle = (id: string) =>
+    DEPARTMENTS.find((d) => d.id === id)?.title || id;
+
   return (
     <div className="adminGrid">
       <form
@@ -123,6 +136,20 @@ console.log("API_URL", API_URL);
         data-aos-duration="3000"
       >
         <div className="sectionTitle">Вакансия маалыматтары</div>
+
+        <div className="formGroup">
+          <label>Бөлүм / Филиал</label>
+          <select
+            value={vacDepartment}
+            onChange={(e) => setVacDepartment(e.target.value)}
+          >
+            {DEPARTMENTS.map((dept) => (
+              <option key={dept.id} value={dept.id}>
+                {dept.title}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="formGroup">
           <label>Вакансиянын аталышы</label>
@@ -189,6 +216,9 @@ console.log("API_URL", API_URL);
           vacancies.map((item) => (
             <div className="card" key={item.id}>
               <div className="bodyBox">
+                <span className="excerpt">
+                  <strong>Бөлүм:</strong> {departmentTitle(item.department)}
+                </span>
                 <h2 className="title">{item.title}</h2>
                 <p className="excerpt">{item.description}</p>
                 {item.requirements && (
