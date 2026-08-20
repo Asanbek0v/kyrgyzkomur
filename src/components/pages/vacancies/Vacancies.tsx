@@ -25,6 +25,19 @@ interface Department {
   vacancies: VacancyItem[];
 }
 
+interface BackendVacancy {
+  id: number;
+  title: string;
+  description?: string;
+  requirements?: string;
+  salary?: string;
+  department: string;
+  image?: string;
+  date?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 interface VacancyFormInputs {
   fullName: string;
   phone: string;
@@ -33,38 +46,17 @@ interface VacancyFormInputs {
   photo?: FileList;
 }
 
-const departmentsData: Department[] = [
-  {
-    id: "central",
-    title: "ЦЕНТРАЛЬНЫЙ АППАРАТ",
-    vacancies: [
-      { id: 1, title: "Главный специалист", count: 1 },
-      { id: 2, title: "Юрист", count: 1 },
-    ],
-  },
-  {
-    id: "kara-keche",
-    title: 'Филиал "КАРА-КЕЧЕ"',
-    vacancies: [
-      { id: 1, title: "Автослесарь", count: 1 },
-      { id: 2, title: "Инженер по буровзрывным работам", count: 1 },
-    ],
-  },
-  {
-    id: "issyk-kul",
-    title: 'Филиал "ИССЫК-КУЛЬСКОЕ ПАРОХОДСТВО"',
-    vacancies: [{ id: 1, title: "Капитан судна", count: 1 }],
-  },
-  {
-    id: "yuzhnyi",
-    title: 'Филиал "ЮЖНЫЙ"',
-    vacancies: [
-      { id: 1, title: "Главный инженер", count: 1 },
-      { id: 2, title: "Главный специалист юрист", count: 1 },
-      { id: 3, title: "Водитель хозяйственно-технического отдела", count: 1 },
-    ],
-  },
+// Названия и порядок филиалов остаются статичными.
+// Список вакансий теперь загружается с backend.
+const DEPARTMENTS_META: { id: string; title: string }[] = [
+  { id: "central", title: "ЦЕНТРАЛЬНЫЙ АППАРАТ" },
+  { id: "kara-keche", title: 'Филиал "КАРА-КЕЧЕ"' },
+  { id: "issyk-kul", title: 'Филиал "ИССЫК-КУЛЬСКОЕ ПАРОХОДСТВО"' },
+  { id: "yuzhnyi", title: 'Филиал "ЮЖНЫЙ"' },
 ];
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const VACANCIES_URL = `${API_URL}/vacancy`;
 
 const Vacancies: FC = () => {
   const [openDeptId, setOpenDeptId] = useState<string | null>("yuzhnyi");
@@ -72,6 +64,11 @@ const Vacancies: FC = () => {
   const [selectedVacancy, setSelectedVacancy] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<string>("");
+
+  const [departmentsData, setDepartmentsData] = useState<Department[]>(
+    DEPARTMENTS_META.map((d) => ({ ...d, vacancies: [] })),
+  );
+  const [vacanciesLoading, setVacanciesLoading] = useState<boolean>(true);
 
   const {
     register,
@@ -95,6 +92,46 @@ const Vacancies: FC = () => {
     }, 100);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Загружаем вакансии с backend и группируем по филиалам
+  useEffect(() => {
+    const fetchVacancies = async () => {
+      setVacanciesLoading(true);
+      try {
+        const res = await fetch(VACANCIES_URL);
+        if (!res.ok) {
+          console.error("Ошибка получения вакансий, status:", res.status);
+          return;
+        }
+
+        const data = await res.json();
+        const list: BackendVacancy[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.vacancies)
+            ? data.vacancies
+            : [];
+
+        const grouped: Department[] = DEPARTMENTS_META.map((dept) => ({
+          ...dept,
+          vacancies: list
+            .filter((v) => v.department === dept.id)
+            .map((v) => ({
+              id: v.id,
+              title: v.title,
+              count: 1,
+            })),
+        }));
+
+        setDepartmentsData(grouped);
+      } catch (err) {
+        console.error("Ошибка загрузки вакансий:", err);
+      } finally {
+        setVacanciesLoading(false);
+      }
+    };
+
+    fetchVacancies();
   }, []);
 
   const toggleDept = (id: string) => {
@@ -257,62 +294,72 @@ const Vacancies: FC = () => {
           </p>
 
           <div className="Vacancies--accordion" data-aos="fade-up">
-            {departmentsData.map((el) => {
-              const isOpen = openDeptId === el.id;
-              return (
-                <div key={el.id} className="accordion-item">
-                  <button
-                    className={`accordion-header ${isOpen ? "active" : ""}`}
-                    onClick={() => toggleDept(el.id)}
-                  >
-                    <span className="icon">
-                      {isOpen ? (
-                        <ChevronUp size={18} />
-                      ) : (
-                        <ChevronDown size={18} />
-                      )}
-                    </span>
-                    <span className="title">{el.title}</span>
-                  </button>
+            {vacanciesLoading ? (
+              <p style={{ padding: "16px" }}>Загрузка...</p>
+            ) : (
+              departmentsData.map((el) => {
+                const isOpen = openDeptId === el.id;
+                return (
+                  <div key={el.id} className="accordion-item">
+                    <button
+                      className={`accordion-header ${isOpen ? "active" : ""}`}
+                      onClick={() => toggleDept(el.id)}
+                    >
+                      <span className="icon">
+                        {isOpen ? (
+                          <ChevronUp size={18} />
+                        ) : (
+                          <ChevronDown size={18} />
+                        )}
+                      </span>
+                      <span className="title">{el.title}</span>
+                    </button>
 
-                  <div
-                    className={`accordion-body-wrapper ${isOpen ? "open" : ""}`}
-                  >
-                    <div className="accordion-body">
-                      <table className="vacancies-table">
-                        <thead>
-                          <tr>
-                            <th className="col-num">№</th>
-                            <th className="col-title">Должность</th>
-                            <th className="col-count">Вакантное место</th>
-                            <th className="col-action">Действие</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {el.vacancies.map((item) => (
-                            <tr key={item.id}>
-                              <td className="col-num">{item.id}</td>
-                              <td className="col-title">{item.title}</td>
-                              <td className="col-count">{item.count}</td>
-                              <td className="col-action">
-                                <button
-                                  className="apply-btn"
-                                  onClick={() =>
-                                    handleOpenModal(el.title, item.title)
-                                  }
-                                >
-                                  Откликнуться
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div
+                      className={`accordion-body-wrapper ${isOpen ? "open" : ""}`}
+                    >
+                      <div className="accordion-body">
+                        {el.vacancies.length === 0 ? (
+                          <p style={{ padding: "16px", color: "#94a3b8" }}>
+                            Пока нет свободных вакансий
+                          </p>
+                        ) : (
+                          <table className="vacancies-table">
+                            <thead>
+                              <tr>
+                                <th className="col-num">№</th>
+                                <th className="col-title">Должность</th>
+                                <th className="col-count">Вакантное место</th>
+                                <th className="col-action">Действие</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {el.vacancies.map((item, index) => (
+                                <tr key={item.id}>
+                                  <td className="col-num">{index + 1}</td>
+                                  <td className="col-title">{item.title}</td>
+                                  <td className="col-count">{item.count}</td>
+                                  <td className="col-action">
+                                    <button
+                                      className="apply-btn"
+                                      onClick={() =>
+                                        handleOpenModal(el.title, item.title)
+                                      }
+                                    >
+                                      Откликнуться
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       </div>
