@@ -44,8 +44,16 @@ const AddVacanceis = () => {
     try {
       const response = await fetch(VACANCIES_URL);
       if (response.ok) {
-        const data: Vacancy[] = await response.json();
-        setVacancies(data);
+        const data = await response.json();
+        // Backend {vacancies: [...]} же түз эле [...] кайтарышы мүмкүн — экөөнү тең текшерели
+        const list: Vacancy[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.vacancies)
+            ? data.vacancies
+            : [];
+        setVacancies(list);
+      } else {
+        console.error("Вакансияларды алуу катасы, status:", response.status);
       }
     } catch (error) {
       console.error("Вакансияларды алууда ката чыкты:", error);
@@ -86,7 +94,10 @@ const AddVacanceis = () => {
       });
 
       if (response.ok) {
-        const createdVacancy: Vacancy = await response.json();
+        const responseData = await response.json();
+        // Backend { message, vacancy: {...} } түрүндө кайтарат — чыныгы объектти бөлүп алабыз
+        const createdVacancy: Vacancy = responseData.vacancy ?? responseData;
+
         setVacancies((prev) => [...prev, createdVacancy]);
 
         alert("Вакансия ийгиликтүү кошулду!");
