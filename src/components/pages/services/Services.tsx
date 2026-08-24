@@ -59,6 +59,10 @@ const Services: FC = () => {
       } else {
         sessionStorage.setItem("token", result.token);
       }
+      // TopBar ар дайым localStorage'дан окуйт, ошондуктан токенди
+      // "эстеп калуу" тандалганбы же жокпу дегенге карабай
+      // ар дайым localStorage'га сактайбыз.
+      localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
 
       window.dispatchEvent(new Event("authChange"));
