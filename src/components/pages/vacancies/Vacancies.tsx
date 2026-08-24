@@ -46,8 +46,7 @@ interface VacancyFormInputs {
   photo?: FileList;
 }
 
-// Названия и порядок филиалов остаются статичными.
-// Список вакансий теперь загружается с backend.
+
 const DEPARTMENTS_META: { id: string; title: string }[] = [
   { id: "central", title: "ЦЕНТРАЛЬНЫЙ АППАРАТ" },
   { id: "kara-keche", title: 'Филиал "КАРА-КЕЧЕ"' },
@@ -94,7 +93,6 @@ const Vacancies: FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Загружаем вакансии с backend и группируем по филиалам
   useEffect(() => {
     const fetchVacancies = async () => {
       setVacanciesLoading(true);
@@ -320,7 +318,7 @@ const Vacancies: FC = () => {
                     >
                       <div className="accordion-body">
                         {el.vacancies.length === 0 ? (
-                          <p style={{ padding: "16px", color: "#94a3b8" }}>
+                          <p style={{ padding: "20px", color: "#94a3b8" }}>
                             Пока нет свободных вакансий
                           </p>
                         ) : (
