@@ -45,7 +45,6 @@ const AddVacanceis = () => {
       const response = await fetch(VACANCIES_URL);
       if (response.ok) {
         const data = await response.json();
-        // Backend {vacancies: [...]} же түз эле [...] кайтарышы мүмкүн — экөөнү тең текшерели
         const list: Vacancy[] = Array.isArray(data)
           ? data
           : Array.isArray(data?.vacancies)
@@ -95,7 +94,6 @@ const AddVacanceis = () => {
 
       if (response.ok) {
         const responseData = await response.json();
-        // Backend { message, vacancy: {...} } түрүндө кайтарат — чыныгы объектти бөлүп алабыз
         const createdVacancy: Vacancy = responseData.vacancy ?? responseData;
 
         setVacancies((prev) => [...prev, createdVacancy]);

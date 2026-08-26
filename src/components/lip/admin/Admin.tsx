@@ -251,7 +251,6 @@ export default function Admin() {
     }
   };
 
-  // ==== Вакансия кошуу (page === 2) ====
   const [vacTitle, setVacTitle] = useState("");
   const [vacDescription, setVacDescription] = useState("");
   const [vacRequirements, setVacRequirements] = useState("");

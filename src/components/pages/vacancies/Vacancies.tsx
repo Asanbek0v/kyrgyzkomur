@@ -318,7 +318,7 @@ const Vacancies: FC = () => {
                     >
                       <div className="accordion-body">
                         {el.vacancies.length === 0 ? (
-                          <p style={{ padding: "16px", color: "#94a3b8" }}>
+                          <p style={{ padding: "20px", color: "#94a3b8" }}>
                             Пока нет свободных вакансий
                           </p>
                         ) : (
