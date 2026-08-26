@@ -1,14 +1,8 @@
 "use client";
 
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import L from "leaflet";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 import "./Contact.scss";
@@ -43,7 +37,6 @@ const branches: ContactItem[] = [
   { label: "Филиал Южный", phone: "+996 (700) 240 679" },
 ];
 
-// Тел. номерлерди tel: шилтемеси үчүн тазалоо
 const toTelHref = (phone: string) => `tel:${phone.replace(/\D/g, "")}`;
 
 const position: [number, number] = [41.2044, 74.7661];
@@ -60,7 +53,6 @@ const ChangeMap = ({ position }: { position: [number, number] }) => {
   return null;
 };
 
-// Демейки Leaflet маркер иконкасын Next.js/webpack бузбашы үчүн туураланды
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -594,6 +586,16 @@ const coalBranches: CoalBranch[] = [
 ];
 
 const Contact: FC = () => {
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPage((prev) => (prev === 0 ? 1 : 0));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section id="Contact">
       <div className="container">
@@ -630,7 +632,6 @@ const Contact: FC = () => {
               </div>
             </div>
           </div>
-
           <div className="Contact--body">
             <div
               className="Contact--body__left"
@@ -674,76 +675,90 @@ const Contact: FC = () => {
               </ul>
             </div>
           </div>
-
-          <div
-            className="Contact--footer"
-            data-aos="zoom-in"
-            data-aos-duration="800"
-          >
-            <div className="Contact--footer__head">
-              <h3>Мы на карте</h3>
-
-              <Link
-                href="https://go.2gis.com/vJGJM"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="Contact--footer__link"
-              >
-                <MapPin size={16} />
-                Открыть в 2GIS
-              </Link>
-            </div>
-
-            <div className="Contact--footer__map">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2924.621400134707!2d74.6062892759583!3d42.859726771150996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x389eb633161a2095%3A0xfbb1bbd9c1a3fbf2!2zMjQg0YPQuy4g0JrRg9C70LDRgtC-0LLQsCwg0JHQuNGI0LrQtdC6!5e0!3m2!1sru!2skg!4v1786954653106!5m2!1sru!2skg"
-                style={{ border: 0, width: "100%", height: "100%" }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            </div>
-          </div>
-
-          <div className="blocks">
-            <MapContainer
-              center={position}
-              zoom={7}
-              scrollWheelZoom={true}
-              style={{ height: "500px", width: "100%" }}
+          {page === 0 ? (
+            <div
+              className="Contact--footer"
+              data-aos="zoom-in"
+              data-aos-duration="800"
             >
-              <TileLayer
-                attribution="&copy; OpenStreetMap contributors"
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+              <div className="Contact--footer__head">
+                <h3>Мы на карте</h3>
 
-              <ChangeMap position={position} />
+                <Link
+                  href="https://go.2gis.com/vJGJM"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="Contact--footer__link"
+                >
+                  <MapPin size={16} />
+                  Открыть в 2GIS
+                </Link>
+              </div>
 
-              <Marker position={position}>
-                <Popup>📍 {placeName}</Popup>
-              </Marker>
+              <div className="Contact--footer__map">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2924.621400134707!2d74.6062892759583!3d42.859726771150996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x389eb633161a2095%3A0xfbb1bbd9c1a3fbf2!2zMjQg0YPQuy4g0JrRg9C70LDRgtC-0LLQsCwg0JHQuNGI0LrQtdC6!5e0!3m2!1sru!2skg!4v1786954653106!5m2!1sru!2skg"
+                  style={{ border: 0, width: "100%", height: "100%" }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              </div>
+            </div>
+          ) : null}
+          ,
+          {page === 1 ? (
+            <div
+              className="Contact--footer"
+              data-aos="fade-right"
+              data-aos-duration="800"
+              data-aos-delay="100"
+            >
+              <div className="Contact--footer__map">
+                <MapContainer
+                  center={position}
+                  zoom={7}
+                  scrollWheelZoom={true}
+                  style={{ height: "500px", width: "100%" }}
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
 
-              {coalBranches.map((branch) => (
-                <Marker key={branch.id} position={branch.position} icon={coalIcon}>
-                  <Popup>
-                    <strong>{branch.name}</strong>
-                    <br />
-                    🗺️ {branch.region}
-                    <br />
-                    📍 {branch.address}
-                    {branch.phone && (
-                      <>
+                  <ChangeMap position={position} />
+
+                  <Marker position={position}>
+                    <Popup>📍 {placeName}</Popup>
+                  </Marker>
+
+                  {coalBranches.map((branch) => (
+                    <Marker
+                      key={branch.id}
+                      position={branch.position}
+                      icon={coalIcon}
+                    >
+                      <Popup>
+                        <strong>{branch.name}</strong>
                         <br />
-                        📞 {branch.phone}
-                      </>
-                    )}
-                    <br />
-                    🔥 Көмүр сатылат
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
+                        🗺️ {branch.region}
+                        <br />
+                        📍 {branch.address}
+                        {branch.phone && (
+                          <>
+                            <br />
+                            📞 {branch.phone}
+                          </>
+                        )}
+                        <br />
+                        🔥 Көмүр сатылат
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
