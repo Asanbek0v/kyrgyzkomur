@@ -1,19 +1,16 @@
 "use client";
 
 import { FC, FormEvent, useState } from "react";
-import { BotMessageSquare, X } from "lucide-react";
+import { BotMessageSquare, MapPin, X } from "lucide-react";
 import Image from "next/image";
 
 import "./ChatWidget.scss";
 
 import { useTranslatePage } from "@/src/api/useTranslate";
 import whatsApp from "@/src/assets/WhatsApp_Logo_green.svg.webp";
+import BaseSelector, { CoalBase } from "../basaSelector/BasaSelector";
 
-
-type ChatMode = "bot" | "translate" | null;
-
-
-
+type ChatMode = "bot" | "translate" | "bases" | null;
 
 type Language = "ky" | "ru" | null;
 
@@ -25,12 +22,9 @@ type Message = {
 const ChatWidget: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeMode, setActiveMode] = useState<ChatMode>(null);
-
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [messages, setMessages] = useState<Message[]>([]);
-
   const { mutate: translatePage } = useTranslatePage();
 
   const phone = "996704210706";
@@ -60,6 +54,69 @@ const ChatWidget: FC = () => {
     setIsOpen(false);
   };
 
+  const handleSelectBase = (base: CoalBase) => {
+    const text = `Мен көмүрдү "${base.name}" базасынан (${base.address}) алып кетейин.`;
+    setActiveMode("bot");
+    sendCustomMessage(text);
+  };
+
+  const sendCustomMessage = async (customText: string) => {
+    if (!customText || loading) return;
+
+    const userMessage: Message = {
+      role: "user",
+      content: customText,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setLoading(true);
+
+    try {
+      const history = messages.map((message) => ({
+        role: message.role,
+        content: message.content,
+      }));
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: customText,
+          history,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Сервердик ката");
+      }
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data.answer,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("========== CHAT ERROR ==========", error);
+      const errorText =
+        error instanceof Error ? error.message : "Белгисиз ката";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Ката чыкты: ${errorText}`,
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLanguage = (lang: Language) => {
     if (!lang) return;
 
@@ -73,9 +130,7 @@ const ChatWidget: FC = () => {
 
     const text = input.trim();
 
-    if (!text) return;
-
-    if (loading) return;
+    if (!text || loading) return;
 
     const userMessage: Message = {
       role: "user",
@@ -83,9 +138,7 @@ const ChatWidget: FC = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-
     setInput("");
-
     setLoading(true);
 
     try {
@@ -96,11 +149,9 @@ const ChatWidget: FC = () => {
 
       const response = await fetch("/api/chat", {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           message: text,
           history,
@@ -108,9 +159,6 @@ const ChatWidget: FC = () => {
       });
 
       const data = await response.json();
-
-      console.log("СТАТУС ЧАТА:", response.status);
-      console.log("ОТВЕТ ЧАТА:", data);
 
       if (!response.ok) {
         throw new Error(data?.error || "Ответ от сервера не получен");
@@ -122,20 +170,8 @@ const ChatWidget: FC = () => {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-
-      if (data?.orderCompleted) {
-        console.log("✅ Заказ оформлен полностью");
-
-        if (data?.telegramSent) {
-          console.log("✅ Заказ отправлен в Telegram");
-        } else {
-          console.log("⚠️ Заказ оформлен, но не отправлен в Telegram");
-        }
-      }
     } catch (error) {
-      console.error("========== ОШИБКА ЧАТА ==========");
-      console.error(error);
-      console.error("=================================");
+      console.error("========== ОШИБКА ЧАТА ==========", error);
 
       const errorText =
         error instanceof Error ? error.message : "Неизвестная ошибка";
@@ -164,11 +200,21 @@ const ChatWidget: FC = () => {
                 onClick={() => handleMode("bot")}
               >
                 <span>🤖</span>
-
                 <div>
                   <strong>AI Ассистент</strong>
-
                   <small>Задать вопрос</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className="ChatWidget--options_bot"
+                onClick={() => handleMode("bases")}
+              >
+                <span>📍</span>
+                <div>
+                  <strong>Базалар</strong>
+                  <small>Жакын базаны тандоо</small>
                 </div>
               </button>
 
@@ -178,10 +224,8 @@ const ChatWidget: FC = () => {
                 onClick={() => handleMode("translate")}
               >
                 <span>🌐</span>
-
                 <div>
                   <strong>Переводчик</strong>
-
                   <small>Перевести сайт</small>
                 </div>
               </button>
@@ -194,10 +238,8 @@ const ChatWidget: FC = () => {
                 onClick={handleClose}
               >
                 <Image src={whatsApp} alt="WhatsApp" width={20} height={20} />
-
                 <div>
                   <strong>WhatsApp</strong>
-
                   <small>Связаться с нами</small>
                 </div>
               </a>
@@ -209,10 +251,8 @@ const ChatWidget: FC = () => {
               <div className="ChatWidget--bot_header">
                 <div className="ChatWidget--bot_title">
                   <div className="ChatWidget--bot_icon">🤖</div>
-
                   <div>
                     <h3>AI Ассистент</h3>
-
                     <span>{loading ? "Готовит ответ..." : "В сети"}</span>
                   </div>
                 </div>
@@ -231,11 +271,8 @@ const ChatWidget: FC = () => {
                 {messages.length === 0 && (
                   <div className="ChatWidget--welcome">
                     <div className="ChatWidget--welcome_icon">🤖</div>
-
                     <h4>Здравствуйте! 👋</h4>
-
                     <p>Я AI-ассистент сайта КыргызКомур.</p>
-
                     <p>
                       Вы можете задать вопрос о компании, угле, ценах, доставке
                       и услугах.
@@ -284,17 +321,34 @@ const ChatWidget: FC = () => {
             </div>
           )}
 
+          {activeMode === "bases" && (
+            <div className="ChatWidget--bases_modal">
+              <div className="ChatWidget--bot_header">
+                <div className="ChatWidget--bot_title">
+                  <MapPin size={20} />
+                  <h3>Көмүр базалары</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="ChatWidget--window_close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="ChatWidget--bases_body">
+                <BaseSelector onSelectBase={handleSelectBase} />
+              </div>
+            </div>
+          )}
+
           {activeMode === "translate" && (
             <div className="ChatWidget--language">
-              {/* ХЕДЕР */}
-
               <div className="ChatWidget--language_header">
                 <div>
                   <span>🌐</span>
-
                   <div>
                     <h3>Переводчик сайта</h3>
-
                     <small>Выберите язык</small>
                   </div>
                 </div>
@@ -318,10 +372,8 @@ const ChatWidget: FC = () => {
                   onClick={() => handleLanguage("ky")}
                 >
                   <span className="flag">🇰🇬</span>
-
                   <div>
                     <strong>Кыргызский</strong>
-
                     <small>Кыргызча</small>
                   </div>
                 </button>
@@ -332,10 +384,8 @@ const ChatWidget: FC = () => {
                   onClick={() => handleLanguage("ru")}
                 >
                   <span className="flag">🇷🇺</span>
-
                   <div>
                     <strong>Русский</strong>
-
                     <small>Русский</small>
                   </div>
                 </button>
