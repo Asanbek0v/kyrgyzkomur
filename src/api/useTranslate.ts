@@ -49,7 +49,7 @@ export const useTranslatePage = () => {
                 translated,
               );
             } catch (err) {
-              console.error("Элемент которулбай калды:", err);
+              console.error("Элемент не был перенесен", err);
             }
           }
         }),

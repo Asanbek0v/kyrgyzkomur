@@ -1,242 +1,62 @@
 "use client";
 
+import { FC, FormEvent, useState } from "react";
+import { BotMessageSquare, X } from "lucide-react";
+import Image from "next/image";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
 import "./ChatWidget.scss";
-import { BotMessageSquare } from "lucide-react";
+
+import { useTranslatePage } from "@/src/api/useTranslate";
+import whatsApp from "@/src/assets/WhatsApp_Logo_green.svg.webp";
+
 
 type ChatMode = "bot" | "translate" | null;
+
+
+
+
+type Language = "ky" | "ru" | null;
 
 type Message = {
-  sender: "bot" | "user";
-  text: string;
+  role: "user" | "assistant";
+  content: string;
 };
-
-const ChatWidget = () => {
-  const [isOptionsOpen, setIsOptionsOpen] = useState<boolean>(false);
-  const [activeMode, setActiveMode] = useState<ChatMode>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState<string>("");
-  const [isTyping, setIsTyping] = useState<boolean>(false);
-
-
-  const chatBodyRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const chatBody = chatBodyRef.current;
-
-    if (chatBody) {
-      chatBody.scrollTop = chatBody.scrollHeight;
-    }
-  }, [messages, isTyping]);
-
-  const handleMainIconClick = () => {
-    if (activeMode) {
-      setActiveMode(null);
-      setIsOptionsOpen(false);
-    } else {
-      setIsOptionsOpen((prev) => !prev);
-
-import { FC, useState } from "react";
-import { BotMessageSquare, X } from "lucide-react";
-import "./ChatWidget.scss";
-import { useTranslatePage } from "@/src/api/useTranslate";
-
-type ChatMode = "bot" | "translate" | null;
-type Language = "ky" | "ru" | null;
 
 const ChatWidget: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeMode, setActiveMode] = useState<ChatMode>(null);
 
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [messages, setMessages] = useState<Message[]>([]);
+
   const { mutate: translatePage } = useTranslatePage();
+
+  const phone = "996704210706";
+
+  const whatsappMessage = encodeURIComponent(
+    "Здравствуйте! Я хотел бы получить информацию об угле.",
+  );
+
+  const waUrl = `https://wa.me/${phone}?text=${whatsappMessage}`;
 
   const handleMainButton = () => {
     if (activeMode) {
       setActiveMode(null);
       return;
- 
     }
+
     setIsOpen((prev) => !prev);
   };
 
-
-  const handleSelectMode = (mode: "bot" | "translate") => {
-    setActiveMode(mode);
-    setIsOptionsOpen(false);
-
-    if (mode === "bot") {
-      setMessages([
-        {
-          sender: "bot",
-          text: "Саламатсызбы! Кыргыз Көмүр боюнча сурооңузду бериңиз.",
-        },
-      ]);
-    }
-
-    if (mode === "translate") {
-      setMessages([
-        {
-          sender: "bot",
-          text: "Текстти киргизиңиз (Кыргызча ⇄ Русский).",
-        },
-      ]);
-    }
-
-    setInputValue("");
-    setIsTyping(false);
-  };
-
-  const translateText = async (text: string): Promise<string> => {
-    try {
-      const res = await fetch(
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
-          text,
-        )}&langpair=ky|ru`,
-      );
-
-      if (!res.ok) {
-        throw new Error("Translation request failed");
-      }
-
-      const data = await res.json();
-
-      return (
-        data.responseData?.translatedText ||
-        "Котормого мүмкүн болгон жок."
-      );
-    } catch (error) {
-      console.error("Translation error:", error);
-
-      return "Котормо сервисине туташууда ката чыкты.";
-    }
-  };
-
-  const getBotResponse = (text: string): string => {
-    const lower = text.toLowerCase();
-
-    if (
-      lower.includes("баа") ||
-      lower.includes("цена") ||
-      lower.includes("канча")
-    ) {
-      return "Көмүрдүн баасы жана сорттору Сервис-центр бөлүмүндө көрсөтүлгөн.";
-    }
-
-    if (
-      lower.includes("салам") ||
-      lower.includes("привет") ||
-      lower.includes("хай")
-    ) {
-      return "Саламатсызбы! Сизге кантип жардам бере алам?";
-    }
-
-    if (
-      lower.includes("телефон") ||
-      lower.includes("номер") ||
-      lower.includes("байланыш")
-    ) {
-      return "Биздин байланыш телефонубуз: +996 (704) 21-07-06.";
-    }
-
-    return "Сурооңуз кабыл алынды. Тез арада оператор сиз менен байланышат.";
-  };
-
-  const handleSend = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const userText = inputValue.trim();
-
-    if (!userText || isTyping || !activeMode) {
-      return;
-    }
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: userText,
-      },
-    ]);
-
-    setInputValue("");
-    setIsTyping(true);
-
-    if (activeMode === "bot") {
-      setTimeout(() => {
-        const replyText = getBotResponse(userText);
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "bot",
-            text: replyText,
-          },
-        ]);
-
-        setIsTyping(false);
-      }, 600);
-
-      return;
-    }
-
-    try {
-      const translated = await translateText(userText);
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: translated,
-        },
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  return (
-    <div className="widget-container">
-      {activeMode && (
-        <div className="chat-window">
-          <div className="chat-header">
-            <span>
-              {activeMode === "bot"
-                ? "🤖 Авто-жоопчу Бот"
-                : "🌐 Котормочу"}
-            </span>
-
-            <button
-              type="button"
-              className="close-btn"
-              onClick={() => {
-                setActiveMode(null);
-                setIsOptionsOpen(false);
-              }}
-              aria-label="Чатты жабуу"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="chat-body" ref={chatBodyRef}>
-            {messages.map((msg, index) => (
-              <div
-                key={`${msg.sender}-${index}`}
-                className={`message ${msg.sender}`}
-              >
-                {msg.text}
-              </div>
-            ))}
-
-            {isTyping && (
-              <div className="message bot typing">
-                <span>.</span>
-                <span>.</span>
-                <span>.</span>
-
   const handleMode = (mode: ChatMode) => {
     setActiveMode(mode);
+    setIsOpen(false);
+  };
+
+  const handleClose = () => {
+    setActiveMode(null);
     setIsOpen(false);
   };
 
@@ -248,9 +68,88 @@ const ChatWidget: FC = () => {
     handleClose();
   };
 
-  const handleClose = () => {
-    setActiveMode(null);
-    setIsOpen(false);
+  const handleSendMessage = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const text = input.trim();
+
+    if (!text) return;
+
+    if (loading) return;
+
+    const userMessage: Message = {
+      role: "user",
+      content: text,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+
+    setInput("");
+
+    setLoading(true);
+
+    try {
+      const history = messages.map((message) => ({
+        role: message.role,
+        content: message.content,
+      }));
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          message: text,
+          history,
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log("СТАТУС ЧАТА:", response.status);
+      console.log("ОТВЕТ ЧАТА:", data);
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Ответ от сервера не получен");
+      }
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data?.answer || "К сожалению, не удалось получить ответ.",
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      if (data?.orderCompleted) {
+        console.log("✅ Заказ оформлен полностью");
+
+        if (data?.telegramSent) {
+          console.log("✅ Заказ отправлен в Telegram");
+        } else {
+          console.log("⚠️ Заказ оформлен, но не отправлен в Telegram");
+        }
+      }
+    } catch (error) {
+      console.error("========== ОШИБКА ЧАТА ==========");
+      console.error(error);
+      console.error("=================================");
+
+      const errorText =
+        error instanceof Error ? error.message : "Неизвестная ошибка";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Ошибка: ${errorText}`,
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -261,43 +160,157 @@ const ChatWidget: FC = () => {
             <div className="ChatWidget--options">
               <button
                 type="button"
-                className="ChatWidget--options_translate"
-                onClick={() => handleMode("translate")}
-              >
-                <span>🌐</span>
-                <p>Переводчик</p>
-              </button>
-
-              <button
-                type="button"
                 className="ChatWidget--options_bot"
                 onClick={() => handleMode("bot")}
               >
                 <span>🤖</span>
-                <p>Бот</p>
+
+                <div>
+                  <strong>AI Ассистент</strong>
+
+                  <small>Задать вопрос</small>
+                </div>
               </button>
+
+              <button
+                type="button"
+                className="ChatWidget--options_translate"
+                onClick={() => handleMode("translate")}
+              >
+                <span>🌐</span>
+
+                <div>
+                  <strong>Переводчик</strong>
+
+                  <small>Перевести сайт</small>
+                </div>
+              </button>
+
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ChatWidget--options_bot"
+                onClick={handleClose}
+              >
+                <Image src={whatsApp} alt="WhatsApp" width={20} height={20} />
+
+                <div>
+                  <strong>WhatsApp</strong>
+
+                  <small>Связаться с нами</small>
+                </div>
+              </a>
+            </div>
+          )}
+
+          {activeMode === "bot" && (
+            <div className="ChatWidget--bot">
+              <div className="ChatWidget--bot_header">
+                <div className="ChatWidget--bot_title">
+                  <div className="ChatWidget--bot_icon">🤖</div>
+
+                  <div>
+                    <h3>AI Ассистент</h3>
+
+                    <span>{loading ? "Готовит ответ..." : "В сети"}</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="ChatWidget--window_close"
+                  aria-label="Закрыть"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="ChatWidget--bot_messages">
+                {messages.length === 0 && (
+                  <div className="ChatWidget--welcome">
+                    <div className="ChatWidget--welcome_icon">🤖</div>
+
+                    <h4>Здравствуйте! 👋</h4>
+
+                    <p>Я AI-ассистент сайта КыргызКомур.</p>
+
+                    <p>
+                      Вы можете задать вопрос о компании, угле, ценах, доставке
+                      и услугах.
+                    </p>
+                  </div>
+                )}
+
+                {messages.map((message, index) => (
+                  <div
+                    key={`${message.role}-${index}`}
+                    className={`ChatWidget--message ${message.role}`}
+                  >
+                    {message.content}
+                  </div>
+                ))}
+
+                {loading && (
+                  <div className="ChatWidget--message assistant">
+                    <span className="ChatWidget--typing">
+                      ИИ готовит ответ...
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <form
+                className="ChatWidget--bot_input"
+                onSubmit={handleSendMessage}
+              >
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Напишите ваш вопрос..."
+                  disabled={loading}
+                />
+
+                <button
+                  type="submit"
+                  disabled={loading || !input.trim()}
+                  aria-label="Отправить"
+                >
+                  ➤
+                </button>
+              </form>
             </div>
           )}
 
           {activeMode === "translate" && (
             <div className="ChatWidget--language">
+              {/* ХЕДЕР */}
+
               <div className="ChatWidget--language_header">
                 <div>
                   <span>🌐</span>
-                  <h3>Переводчик сайтов</h3>
+
+                  <div>
+                    <h3>Переводчик сайта</h3>
+
+                    <small>Выберите язык</small>
+                  </div>
                 </div>
+
                 <button
                   type="button"
                   onClick={handleClose}
                   className="ChatWidget--window_close"
-                  aria-label="Жабуу"
+                  aria-label="Закрыть"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               <div className="ChatWidget--language_body">
-                <p>Сайтты кайсы тилге которобуз?</p>
+                <p>На какой язык перевести сайт?</p>
 
                 <button
                   type="button"
@@ -305,9 +318,11 @@ const ChatWidget: FC = () => {
                   onClick={() => handleLanguage("ky")}
                 >
                   <span className="flag">🇰🇬</span>
+
                   <div>
-                    <strong>Кыргызча</strong>
-                    <small>Kyrgyz</small>
+                    <strong>Кыргызский</strong>
+
+                    <small>Кыргызча</small>
                   </div>
                 </button>
 
@@ -317,116 +332,35 @@ const ChatWidget: FC = () => {
                   onClick={() => handleLanguage("ru")}
                 >
                   <span className="flag">🇷🇺</span>
+
                   <div>
                     <strong>Русский</strong>
-                    <small>Russian</small>
+
+                    <small>Русский</small>
                   </div>
                 </button>
               </div>
             </div>
           )}
 
-          {activeMode === "bot" && (
-            <div className="ChatWidget--window">
-              <div className="ChatWidget--window_header">
-                <div className="ChatWidget--window_header-title">
-                  <span>🤖</span>
-                  <h3>Авто-жоопчу Бот</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="ChatWidget--window_close"
-                  aria-label="Жабуу"
-                >
-                  <X size={18} />
-                </button>
-
-              </div>
-
-              <div className="ChatWidget--window_body">
-                <div className="ChatWidget--message bot">
-                  Саламатсызбы! Кыргыз Көмүр боюнча сурооңузду бериңиз.
-                </div>
-              </div>
-
-              <div className="ChatWidget--window_footer">
-                <input type="text" placeholder="Сурооңузду жазыңыз..." />
-                <button type="button">➜</button>
-              </div>
-            </div>
-          )}
-
           <button
             type="button"
-            className={`ChatWidget--main ${isOpen || activeMode ? "active" : ""}`}
+            className={`ChatWidget--main ${
+              isOpen || activeMode ? "active" : ""
+            }`}
             onClick={handleMainButton}
-            aria-label="Chat"
+            aria-label="Чат"
           >
             {isOpen || activeMode ? (
               <X size={25} />
             ) : (
               <BotMessageSquare size={26} />
             )}
-
-          </div>
-
-          <form className="chat-footer" onSubmit={handleSend}>
-            <input
-              type="text"
-              placeholder="Жазыңыз..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              disabled={isTyping}
-            />
-
-            <button
-              type="submit"
-              disabled={isTyping || !inputValue.trim()}
-              aria-label="Жөнөтүү"
-            >
-              ➔
-            </button>
-          </form>
-        </div>
-      )}
-
-      <div className={`options-wrapper ${isOptionsOpen ? "open" : ""}`}>
-        <button
-          type="button"
-          className="option-btn translate-btn"
-          title="Котормочу"
-          onClick={() => handleSelectMode("translate")}
-        >
-          🌐
-        </button>
-
-        <button
-          type="button"
-          className="option-btn bot-btn"
-          title="Бот"
-          onClick={() => handleSelectMode("bot")}
-        >
-          🤖
-        </button>
-      </div>
-
-      <button
-        type="button"
-        className="main-icon-btn"
-        onClick={handleMainIconClick}
-        aria-label="Чат менюсун ачуу"
-      >
-        <BotMessageSquare />
-      </button>
-    </div>
-
           </button>
         </div>
       </div>
     </section>
-
-   );
+  );
 };
 
 export default ChatWidget;

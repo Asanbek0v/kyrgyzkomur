@@ -94,8 +94,7 @@
         width: 0%;
         height: 12px;
         border-radius: 999px;
-        /* Glow (жарык) эффектиси үчүн ачык синий */
-        background: var(--blue-active);
+        // background: var(--blue-active);
         filter: blur(12px);
         opacity: 0.6;
         transition: 0.3s ease;

@@ -1,24 +1,25 @@
 "use client";
-import { FC, useState } from "react";
-import "./Services.scss";
+
+import { useState } from "react";
+import "./Register.scss";
 import logo from "@/src/assets/headerlogo.png";
 import Image from "next/image";
-import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
+import { Lock, User, Mail, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface IServices {
-  login: string;
+interface IRegister {
+  username: string;
+  email: string;
   password: string;
-  rememberMe: boolean;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const Services: FC = () => {
+const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [registerError, setRegisterError] = useState("");
   const router = useRouter();
 
   const {
@@ -26,22 +27,29 @@ const Services: FC = () => {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<IServices>({
+  } = useForm<IRegister>({
     defaultValues: {
-      login: "",
+      username: "",
+      email: "",
       password: "",
-      rememberMe: false,
     },
   });
 
-  const onSubmit: SubmitHandler<IServices> = async (data) => {
-    setLoginError("");
+  const onSubmit: SubmitHandler<IRegister> = async (data) => {
+    setRegisterError("");
+
+    if (!API_URL) {
+      setRegisterError("API URL конфигурацияланган эмес");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_URL}/login`, {
+      const res = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: data.login,
+          username: data.username,
+          email: data.email,
           password: data.password,
         }),
       });
@@ -49,39 +57,26 @@ const Services: FC = () => {
       const result = await res.json();
 
       if (!res.ok) {
-        setLoginError(result.message || "Неверный логин или пароль!");
+        setRegisterError(result.message || "Каттоодо ката кетти!");
         return;
       }
 
-      localStorage.setItem("token", result.token);
-      if (data.rememberMe) {
+      if (result.token) {
         localStorage.setItem("token", result.token);
-      } else {
-        sessionStorage.setItem("token", result.token);
+        // TopBar (жана башка компоненттер) угуп, атын дароо жаңыртышы үчүн
+        window.dispatchEvent(new Event("authChange"));
       }
-      // TopBar ар дайым localStorage'дан окуйт, ошондуктан токенди
-      // "эстеп калуу" тандалганбы же жокпу дегенге карабай
-      // ар дайым localStorage'га сактайбыз.
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("user", JSON.stringify(result.user));
-
-      window.dispatchEvent(new Event("authChange"));
 
       reset();
-
-      if (result.user?.role === "ADMIN") {
-        router.push("/admin");
-      } else {
-        router.push("/");
-      }
+      router.push("/");
     } catch (err) {
-      console.error("Ошибка входа:", err);
-      setLoginError("Ошибка связи с бэкендом");
+      console.error("Register ката:", err);
+      setRegisterError("Backend менен байланышта ката чыкты");
     }
   };
 
   return (
-    <section id="Services">
+    <section id="register">
       <div className="container">
         <div className="Services">
           <div
@@ -96,8 +91,8 @@ const Services: FC = () => {
               data-aos-delay="150"
             >
               <Image src={logo} alt="logo" width={60} height={60} />
-              <h1>Личный кабинет</h1>
-              <span>Вход в систему управления</span>
+              <h1>Каттоо</h1>
+              <span>Жаңы аккаунт түзүү</span>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -105,22 +100,26 @@ const Services: FC = () => {
                 className="Services--block__group"
                 data-aos="fade-up"
                 data-aos-duration="700"
-                data-aos-delay="250"
+                data-aos-delay="200"
               >
-                <span>Логин</span>
+                <span>Толук аты</span>
                 <div className="Services--block__input">
                   <User className="icon" size={18} />
                   <input
                     type="text"
-                    placeholder="gmail...."
-                    {...register("login", {
-                      required: "Введите логин",
+                    placeholder="Аты"
+                    {...register("username", {
+                      required: "Атыңызды киргизиңиз",
+                      minLength: {
+                        value: 2,
+                        message: "Минимум 2 символ",
+                      },
                     })}
                   />
                 </div>
-                {errors.login && (
+                {errors.username && (
                   <p className="Services--block__error">
-                    {errors.login.message}
+                    {errors.username.message}
                   </p>
                 )}
               </div>
@@ -129,7 +128,35 @@ const Services: FC = () => {
                 className="Services--block__group"
                 data-aos="fade-up"
                 data-aos-duration="700"
-                data-aos-delay="350"
+                data-aos-delay="300"
+              >
+                <span>Email</span>
+                <div className="Services--block__input">
+                  <Mail className="icon" size={18} />
+                  <input
+                    type="email"
+                    placeholder="gmail...."
+                    {...register("email", {
+                      required: "Email киргизиңиз",
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: "Email туура эмес форматта",
+                      },
+                    })}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="Services--block__error">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div
+                className="Services--block__group"
+                data-aos="fade-up"
+                data-aos-duration="700"
+                data-aos-delay="400"
               >
                 <span>Пароль</span>
                 <div className="Services--block__input">
@@ -138,10 +165,10 @@ const Services: FC = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Пароль...."
                     {...register("password", {
-                      required: "Введите пароль",
+                      required: "Пароль киргизиңиз",
                       minLength: {
                         value: 6,
-                        message: "Минимум 6 символов",
+                        message: "Минимум 6 символ",
                       },
                     })}
                   />
@@ -161,21 +188,9 @@ const Services: FC = () => {
                 )}
               </div>
 
-              {loginError && (
-                <p className="Services--block__error">{loginError}</p>
+              {registerError && (
+                <p className="Services--block__error">{registerError}</p>
               )}
-
-              <div
-                className="Services--block__actions"
-                data-aos="fade-up"
-                data-aos-duration="700"
-                data-aos-delay="450"
-              >
-                <label className="Services--block__checkbox">
-                  <input type="checkbox" {...register("rememberMe")} />
-                  <span>Запомнить меня</span>
-                </label>
-              </div>
 
               <button
                 type="submit"
@@ -183,24 +198,25 @@ const Services: FC = () => {
                 disabled={isSubmitting}
                 data-aos="fade-up"
                 data-aos-duration="700"
-                data-aos-delay="550"
+                data-aos-delay="600"
               >
-                <span>{isSubmitting ? "Вход..." : "Войти"}</span>
-                <LogIn size={18} />
+                <span>
+                  {isSubmitting
+                    ? "Регистрация болууда..."
+                    : "Регистрация болду"}
+                </span>
+                <UserPlus size={18} />
               </button>
 
               <p
                 className="Services--block__register"
                 data-aos="fade-up"
                 data-aos-duration="700"
-                data-aos-delay="600"
+                data-aos-delay="700"
               >
-                Аккаунтуңуз жокпу?{" "}
-                <Link
-                  href="/qr_login"
-                  className="Services--block__register-link"
-                >
-                  Регистрация
+                Аккаунтуңуз барбы?{" "}
+                <Link href="/login" className="Services--block__register-link">
+                  Войти
                 </Link>
               </p>
             </form>
@@ -211,4 +227,4 @@ const Services: FC = () => {
   );
 };
 
-export default Services;
+export default Register;

@@ -70,7 +70,7 @@ const Footer: FC = () => {
               <MapPin className="icon" size={18} />
               <span>Кыргызская Республика, г. Бишкек, Кулатова 24</span>
             </Link>
-            <Link href={"tel:+996704210706"}>
+            <Link href={"https://wa.me/996704210706"} target="_blank">
               <Phone className="icon" size={18} />
               <span>+996 (704) 21-07-06</span>
             </Link>
