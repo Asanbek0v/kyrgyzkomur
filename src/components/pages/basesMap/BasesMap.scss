@@ -23,6 +23,7 @@ $shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
   background: var(--bg-main);
   color: var(--text-main);
   padding: 80px 0;
+
 }
 
 .BasesMap {
@@ -128,8 +129,8 @@ $shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--border-subtle);
   box-shadow: $shadow-card;
   background: var(--card-bg);
-  position: relative;
-  z-index: 1;
+position: relative;
+z-index: 1;
   @media (max-width: 860px) {
     height: 380px;
   }

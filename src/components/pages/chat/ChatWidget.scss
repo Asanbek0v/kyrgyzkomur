@@ -73,16 +73,16 @@
       a {
         width: 210px;
         min-height: 48px;
-        background: var(--card-bg);
+        background-color: #1e293b !important;
         padding: 10px 14px;
-        border: 1px solid var(--border-color);
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 14px;
-        color: var(--text-primary);
+        color: #f8fafc !important;
         display: flex;
         align-items: center;
         gap: 12px;
         text-decoration: none;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         transition: all 0.2s ease;
 
         span,
@@ -107,19 +107,20 @@
             font-weight: 600;
             line-height: 1.2;
             white-space: nowrap;
+            color: #f8fafc !important; /* Негизги текстти туруктуу ак/ачык кылуу */
           }
 
           small {
             font-size: 11px;
-            color: var(--text-secondary);
+            color: #94a3b8 !important; /* Кошумча текстти туруктуу боз кылуу */
             white-space: nowrap;
           }
         }
 
         &:hover {
           transform: translateX(-4px);
-          background: #263449;
-          border-color: rgba(0, 159, 227, 0.4);
+          background-color: #263449 !important; /* Чычканды алып баргандагы түсү */
+          border-color: rgba(0, 159, 227, 0.5) !important;
         }
       }
     }

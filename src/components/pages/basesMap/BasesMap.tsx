@@ -4,6 +4,8 @@ import { FC, useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import { Navigation, Phone, Clock, MapPin, Compass } from "lucide-react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import "leaflet/dist/leaflet.css";
 import "./BasesMap.scss";
 
@@ -73,6 +75,14 @@ const BasesMap: FC<BasesMapProps> = ({ onSelectBase }) => {
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
 
+  useEffect(() => {
+    AOS.init({
+      duration: 700,
+      easing: "ease-out-cubic",
+      once: true,
+    });
+  }, []);
+
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
       setGeoError("Геолокация не поддерживается вашим браузером");
@@ -111,7 +121,7 @@ const BasesMap: FC<BasesMapProps> = ({ onSelectBase }) => {
     <section id="BasesMap">
       <div className="container">
         <div className="BasesMap">
-          <div className="BasesMap--header">
+          <div className="BasesMap--header" data-aos="fade-down">
             <div className="title">
               <MapPin size={20} />
               <div>
@@ -125,18 +135,24 @@ const BasesMap: FC<BasesMapProps> = ({ onSelectBase }) => {
               className={`geo-btn ${geoLoading ? "loading" : ""}`}
               onClick={handleDetectLocation}
               disabled={geoLoading}
+              data-aos="zoom-in"
+              data-aos-delay="200"
             >
               <Compass size={16} />
               <span>{geoLoading ? "Определение..." : "Найти ближайшую"}</span>
             </button>
           </div>
 
-          {geoError && <div className="BasesMap--error">{geoError}</div>}
+          {geoError && (
+            <div className="BasesMap--error" data-aos="fade-in">
+              {geoError}
+            </div>
+          )}
 
           {/* MAIN CONTENT AREA */}
           <div className="BasesMap--content">
             {/* MAP SECTION */}
-            <div className="map-wrapper">
+            <div className="map-wrapper" data-aos="fade-right" data-aos-delay="150">
               <MapContainer
                 center={mapCenter}
                 zoom={11}
@@ -182,7 +198,7 @@ const BasesMap: FC<BasesMapProps> = ({ onSelectBase }) => {
             </div>
 
             {/* SIDEBAR LIST */}
-            <div className="bases-sidebar">
+            <div className="bases-sidebar" data-aos="fade-left" data-aos-delay="250">
               <h4>Список баз ({bases.length})</h4>
               <div className="bases-list">
                 {bases.map((base, idx) => {
@@ -197,6 +213,9 @@ const BasesMap: FC<BasesMapProps> = ({ onSelectBase }) => {
                         setSelectedBase(base);
                         setMapCenter([base.lat, base.lng]);
                       }}
+                      data-aos="fade-up"
+                      data-aos-delay={100 + idx * 80}
+                      data-aos-anchor=".bases-sidebar"
                     >
                       <div className="base-item--head">
                         <span className="region">{base.region}</span>

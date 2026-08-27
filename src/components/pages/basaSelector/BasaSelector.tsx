@@ -4,7 +4,8 @@ import { FC, useEffect, useState } from "react";
 import { MapPin, Phone, Clock, Navigation } from "lucide-react";
 // import "./BaseSelector.scss";
 import "./BasaSelector.scss";
-
+import AOS from "aos";
+import "aos/dist/aos.css";
 export type CoalBase = {
   id: string;
   name: string;
@@ -775,10 +776,16 @@ const BaseSelector: FC<BaseSelectorProps> = ({ onSelectBase }) => {
       base.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
       base.region.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  return (
+  useEffect(() => {
+    AOS.init({
+      duration: 600,
+      easing: "ease-in-out",
+      once: true,
+    });
+  }, []);
+ return (
     <div className="BaseSelector">
-      <div className="BaseSelector--header">
+      <div className="BaseSelector--header" data-aos="fade-down">
         <MapPin className="icon" size={20} />
         <div>
           <h4>Выберите ближайшую базу.</h4>
@@ -789,7 +796,7 @@ const BaseSelector: FC<BaseSelectorProps> = ({ onSelectBase }) => {
         </div>
       </div>
 
-      <div className="BaseSelector--search">
+      <div className="BaseSelector--search" data-aos="fade-up" data-aos-delay="100">
         <input
           type="text"
           value={searchQuery}
@@ -811,6 +818,8 @@ const BaseSelector: FC<BaseSelectorProps> = ({ onSelectBase }) => {
                 setSelectedId(base.id);
                 onSelectBase(base);
               }}
+              data-aos="fade-up"
+              data-aos-delay={ index * 100 } // Карточкалар биринен сала экинчиси пайда болушу үчүн delay коштук
             >
               <div className="BaseSelector--card_head">
                 <span className="region">{base.region}</span>
