@@ -53,7 +53,6 @@ const ChatWidget: FC = () => {
     setActiveMode(null);
     setIsOpen(false);
   };
-
   const handleSelectBase = (base: CoalBase) => {
     const text = `Мен көмүрдү "${base.name}" базасынан (${base.address}) алып кетейин.`;
     setActiveMode("bot");
