@@ -783,7 +783,7 @@ const BaseSelector: FC<BaseSelectorProps> = ({ onSelectBase }) => {
       once: true,
     });
   }, []);
- return (
+  return (
     <div className="BaseSelector">
       <div className="BaseSelector--header" data-aos="fade-down">
         <MapPin className="icon" size={20} />
@@ -796,7 +796,11 @@ const BaseSelector: FC<BaseSelectorProps> = ({ onSelectBase }) => {
         </div>
       </div>
 
-      <div className="BaseSelector--search" data-aos="fade-up" data-aos-delay="100">
+      <div
+        className="BaseSelector--search"
+        data-aos="fade-up"
+        data-aos-delay="100"
+      >
         <input
           type="text"
           value={searchQuery}
@@ -819,7 +823,7 @@ const BaseSelector: FC<BaseSelectorProps> = ({ onSelectBase }) => {
                 onSelectBase(base);
               }}
               data-aos="fade-up"
-              data-aos-delay={ index * 100 } // Карточкалар биринен сала экинчиси пайда болушу үчүн delay коштук
+              data-aos-delay={index * 100} // Карточкалар биринен сала экинчиси пайда болушу үчүн delay коштук
             >
               <div className="BaseSelector--card_head">
                 <span className="region">{base.region}</span>
