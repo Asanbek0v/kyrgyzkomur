@@ -83,7 +83,7 @@ const Hero = () => {
 
           <div className="btn-group" data-aos="zoom-in" data-aos-delay="400">
             <button className="primary-btn">
-              <span>Выбрать базу</span>
+              <span>Выбрать базуЗаказать доставку</span>
               <div className="btn-icon">➔</div>
             </button>
           </div>
