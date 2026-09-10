@@ -6,7 +6,13 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 import "./Contact.scss";
-import { Building2, MapPin, ShieldAlert } from "lucide-react";
+import {
+  Building2,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  ShieldAlert,
+} from "lucide-react";
 import Link from "next/link";
 
 interface ContactItem {
@@ -589,11 +595,10 @@ const Contact: FC = () => {
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPage((prev) => (prev === 0 ? 1 : 0));
-    }, 5000);
-
-    return () => clearInterval(interval);
+    // const interval = setInterval(() => {
+    //   setPage((prev) => (prev === 0 ? 1 : 0));
+    // }, 5000);
+    // return () => clearInterval(interval);
   }, []);
 
   return (
@@ -675,6 +680,9 @@ const Contact: FC = () => {
               </ul>
             </div>
           </div>
+          <button onClick={() => setPage(page === 1? 0 : page + 1)}>
+            <ChevronRight />
+          </button>
           {page === 0 ? (
             <div
               className="Contact--footer"
@@ -759,6 +767,9 @@ const Contact: FC = () => {
               </div>
             </div>
           ) : null}
+          <button onClick={() => setPage(page > 0 ? page - 1 : 1)}>
+            <ChevronLeft />
+          </button>
         </div>
       </div>
     </section>
